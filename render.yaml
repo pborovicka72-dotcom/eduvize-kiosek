@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: eduvize-kiosek
+    runtime: static
+    repo: https://github.com/pborovicka72-dotcom/eduvize-kiosek
+    branch: main
+    buildCommand: mkdir -p public && cp index.html public/index.html && cp config.html public/config.html
+    staticPublishPath: ./public
+    autoDeployTrigger: commit
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

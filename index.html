@@ -96,7 +96,8 @@ function syncEmbeddedHeader(){
  try{frame.contentWindow.postMessage({type:'eduvize-kiosk-layout',headerHeight:height},'*')}catch(e){}
 }
 window.addEventListener('resize',syncEmbeddedHeader);
-$('contentFrame').addEventListener('load',syncEmbeddedHeader);
+$('contentFrame').addEventListener('load',()=>{syncEmbeddedHeader();setTimeout(syncEmbeddedHeader,350);setTimeout(syncEmbeddedHeader,1400)});
+setInterval(syncEmbeddedHeader,2500);
 
 function updateNav(){if(document.body.classList.contains('menu-layout')){$('back').classList.add('hidden');$('home').classList.add('hidden');return}$('back').classList.toggle('hidden',!history.length&&!inFrame);$('home').classList.toggle('hidden',page==='home'&&!inFrame)}// Safari changes the visual viewport when the keyboard appears in a cross-origin iframe.
 function fitVisualViewport(){const viewport=window.visualViewport;const height=viewport?viewport.height:window.innerHeight;document.documentElement.style.setProperty('--kiosk-visual-height',Math.max(240,height)+'px');if(document.body.classList.contains('frame-open')){const header=document.querySelector('.wrap>header');if(header&&viewport&&viewport.offsetTop>0)header.style.transform='translateY('+viewport.offsetTop+'px)';else if(header)header.style.transform=''}}

@@ -56,3 +56,8 @@ assert.equal(apps.resolve({type:'url',target:'https://eduvize-dokumenty-api.onre
 
 const previousImage={type:'app',target:'documents',appUrl:'https://eduvize-dokumenty-api.onrender.com/api/documents/picture/file'};
 apps.normalize({pages:[{buttons:[previousImage]}]});assert.equal(previousImage.type,'document');assert.equal(apps.resolve(previousImage).searchParams.get('document'),'picture');
+
+const documents=apps.resolve({type:'app',target:'documents'});
+assert.equal(documents.hostname,'eduvize-dokumenty-api.onrender.com');assert.equal(documents.pathname,'/display');
+const legacyDocuments=apps.resolve({type:'url',target:'https://pborovicka72-dotcom.github.io/eduvize-dokumenty/index.html?pdf_columns=2'});
+assert.equal(legacyDocuments.hostname,'eduvize-dokumenty-api.onrender.com');assert.equal(legacyDocuments.searchParams.get('pdf_columns'),'2');

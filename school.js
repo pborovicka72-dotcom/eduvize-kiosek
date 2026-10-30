@@ -51,7 +51,7 @@
     const grid = node('div', 'school-cards');
     function card(title, text, wide) {
       if (!text) return null;
-      const section = node('section', 'school-card' + (wide ? ' school-card-wide' : ''));
+      const section = node('section', 'school-card' + (title === 'Pro návštěvníky' ? ' school-card-visitors' : '') + (wide ? ' school-card-wide' : ''));
       section.append(node('h3', '', title), node('p', 'school-text', text));
       grid.append(section);
       return section;

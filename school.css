@@ -43,3 +43,5 @@ body.school-open.frame-open .wrap>#tiles {display:none!important}
 .school-contact a{min-height:30px;padding:3px 0}
 @media(min-width:850px){.school-cards{grid-template-columns:repeat(3,minmax(0,1fr))}.school-card-wide{grid-column:span 3}}
 @media(max-width:600px){.school-intro{flex-direction:row}.school-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.school-card-wide{grid-column:1/-1}.school-photo{width:25%;max-height:100px}}
+
+@media(min-width:850px){.school-card-visitors{grid-column:span 2}}

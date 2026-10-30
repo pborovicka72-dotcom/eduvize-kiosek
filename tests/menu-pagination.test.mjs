@@ -40,3 +40,13 @@ assert.equal(area(10).columns,4);assert.equal(area(10).rows,3);assert.equal(area
 assert.equal(area(10,true).columns,3);assert.equal(area(10,true).rows,4);
 assert.equal(area(25).columns,5);assert.equal(area(25).rows,5);assert.equal(area(26).capacity,25);
 assert.equal(count({}),10);assert.equal(count({tileColumns:3,tileRows:4}),12);assert.equal(count({tileCount:10,tileColumns:8,tileRows:8}),10);
+
+const wide=area(10,false,1200,500,8),tall=area(10,true,500,1200,8);
+assert.equal(wide.columns,5);assert.equal(wide.rows,2);
+assert.equal(tall.columns,2);assert.equal(tall.rows,5);
+for(const total of [3,7,10,17,25])for(const [width,height] of [[1200,500],[500,1200],[800,800]]){
+ const fitted=area(total,height>width,width,height,8);
+ assert.equal(fitted.capacity,total);assert.ok(fitted.columns*fitted.rows>=total);
+ assert.ok(fitted.columns*(fitted.rows-1)<total);
+}
+console.log('Area grids adapt to the available aspect ratio without shrinking the grid.');

@@ -1,7 +1,7 @@
 /* Shared application routing for the kiosk and its configuration previews. */
 (function (root) {
   'use strict';
-  const version = '20261030-32';
+  const version = '20261030-33';
   const urls = Object.freeze({
     weather: 'https://eduvize-weather.onrender.com/display',
     holidays: 'https://pborovicka72-dotcom.github.io/eduvize-svatky/',
@@ -25,9 +25,9 @@
     for (const [app, host] of Object.entries(hosts)) if (url.hostname === host) return app;
     return null;
   }
-  function documentFile(value){try{const u=new URL(value);if(u.hostname==='eduvize-dokumenty-api.onrender.com'&&u.pathname==='/display'&&u.searchParams.has('document')){u.searchParams.set('viewMode','kiosk');u.searchParams.set('output','kiosk');u.searchParams.set('eduvize_ui_version','20261030-32');return u;}const match=u.hostname==='eduvize-dokumenty-api.onrender.com'&&u.pathname.match(/^\/api\/documents\/([^/]+)\/file$/);if(!match)return null;const view=new URL('https://eduvize-dokumenty-api.onrender.com/display');view.searchParams.set('document',decodeURIComponent(match[1]));view.searchParams.set('viewMode','kiosk');view.searchParams.set('output','kiosk');view.searchParams.set('eduvize_ui_version','20261030-32');return view;}catch{return null;}}
+  function documentFile(value){try{const u=new URL(value);if(u.hostname==='eduvize-dokumenty-api.onrender.com'&&u.pathname==='/display'&&u.searchParams.has('document')){u.searchParams.set('viewMode','kiosk');u.searchParams.set('output','kiosk');u.searchParams.set('eduvize_ui_version','20261030-33');return u;}const match=u.hostname==='eduvize-dokumenty-api.onrender.com'&&u.pathname.match(/^\/api\/documents\/([^/]+)\/file$/);if(!match)return null;const view=new URL('https://eduvize-dokumenty-api.onrender.com/display');view.searchParams.set('document',decodeURIComponent(match[1]));view.searchParams.set('viewMode','kiosk');view.searchParams.set('output','kiosk');view.searchParams.set('eduvize_ui_version','20261030-33');return view;}catch{return null;}}
   function imageSource(value){try{const u=new URL(value);return ['http:','https:'].includes(u.protocol)&&(/\.(?:png|jpe?g|gif|webp|avif|svg|bmp)(?:$)/i.test(u.pathname)||/^encrypted-tbn\d*\.gstatic\.com$/i.test(u.hostname)||u.hostname==='images.unsplash.com');}catch{return false;}}
-  function imageViewer(value,base){const source=new URL(value,base);if(!['http:','https:'].includes(source.protocol))return null;const viewer=new URL('https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/image-viewer.html');viewer.searchParams.set('src',source.href);viewer.searchParams.set('v','20261030-32');return viewer;}
+  function imageViewer(value,base){const source=new URL(value,base);if(!['http:','https:'].includes(source.protocol))return null;const viewer=new URL('https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/image-viewer.html');viewer.searchParams.set('src',source.href);viewer.searchParams.set('v','20261030-33');return viewer;}
   function normalize(config) {
     if (!config || !Array.isArray(config.pages)) return config;
     for(const page of config.pages) if(page.id==='school') page.buttons=(page.buttons||[]).filter(item=>!(item.type==='page'&&item.target==='home'&&/^zpět$/i.test((item.label||'').trim())));
@@ -46,7 +46,7 @@
   function resolve(item, base) {
     if(item.type!=='image'){const file=documentFile(item.type==='app'?item.appUrl:item.target);if(file)return file;}
     if(item.type==='image'||(['url','document'].includes(item.type)&&imageSource(item.target)))return imageViewer(item.target,base);
-    if(item.type==='document'){const url=new URL(item.target,base);if(url.hostname==='eduvize-dokumenty-api.onrender.com'&&url.searchParams.has('document'))url.searchParams.set('eduvize_ui_version','20261030-32');if(!['https:','http:'].includes(url.protocol))return null;return url;}
+    if(item.type==='document'){const url=new URL(item.target,base);if(url.hostname==='eduvize-dokumenty-api.onrender.com'&&url.searchParams.has('document'))url.searchParams.set('eduvize_ui_version','20261030-33');if(!['https:','http:'].includes(url.protocol))return null;return url;}
     const app = item.type === 'app' ? item.target : identify(item.target);
     if (item.type === 'app' && !urls[app]) return null;
     const supplied = item.type === 'app' ? item.appUrl : item.target;

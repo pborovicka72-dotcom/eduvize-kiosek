@@ -1,0 +1,11 @@
+/* Layout for the structured page renderer and its editor. */
+.page-content{flex:1;min-height:0;overflow:auto;display:grid;gap:12px;align-content:start}
+.page-content[hidden]{display:none}
+.page-intro{margin:0;font-size:clamp(15px,1.6vw,20px);line-height:1.5;white-space:pre-line}
+.page-section{padding:16px;background:var(--ev-surface);border:1px solid var(--ev-border);border-radius:var(--ev-card-radius)}
+.page-section h2{margin:0 0 8px;font-size:clamp(17px,1.8vw,24px);color:var(--ev-primary)}
+.page-section p{margin:0;line-height:1.5;white-space:pre-line;overflow-wrap:anywhere;font-size:clamp(14px,1.4vw,18px)}
+body.content-page #tiles{flex:0 0 auto;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));max-height:30%;}
+body.content-page #tiles:empty{display:none}
+
+.page-content-editor{margin:20px 0}.page-content-editor>.edu-admin__field{margin:14px 0}.page-content-editor .buttonEditor>.edu-admin__field{margin:12px 0}

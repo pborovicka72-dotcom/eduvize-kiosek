@@ -44,11 +44,3 @@ body.tiles-home #tiles{grid-template-columns:repeat(var(--home-cols,3),minmax(0,
 .wrap>header .toolbar{flex-shrink:0;margin-left:auto}
 body.frame-open #pageContent{display:none}
 body:not(.menu-layout) .hero{display:none}
-.page-content{flex:1;min-height:0;overflow:auto;display:grid;gap:12px;align-content:start}
-.page-content[hidden]{display:none}
-.page-intro{margin:0;font-size:clamp(15px,1.6vw,20px);line-height:1.5;white-space:pre-line}
-.page-section{padding:16px;background:var(--ev-surface);border:1px solid var(--ev-border);border-radius:var(--ev-card-radius)}
-.page-section h2{margin:0 0 8px;font-size:clamp(17px,1.8vw,24px);color:var(--ev-primary)}
-.page-section p{margin:0;line-height:1.5;white-space:pre-line;overflow-wrap:anywhere;font-size:clamp(14px,1.4vw,18px)}
-body.content-page #tiles{flex:0 0 auto;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));max-height:30%;}
-body.content-page #tiles:empty{display:none}

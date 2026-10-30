@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+const context={window:{},document:{readyState:'loading',addEventListener(){}}};
+vm.runInNewContext(fs.readFileSync(new URL('../../eduvize-styly/design-system/typography.js',import.meta.url),'utf8'),context);
+const format=context.window.EduvizeTypography.format;
+assert.equal(format('Jdeme v pátek a v sobotu.'),'Jdeme v\u00a0pátek a\u00a0v\u00a0sobotu.');
+assert.equal(format('Dne 30. 10. 2026 v 14:30'),'Dne 30.\u00a010.\u00a02026 v\u00a014:30');
+assert.equal(format('30. října 2026'),'30.\u00a0října\u00a02026');
+assert.equal(format('30.10.2026'),'30.\u00a010.\u00a02026');
+assert.equal(format('v2026.10.30.20'),'v2026.10.30.20');
+assert.equal(format('https://example.org/a'),'https://example.org/a');
+assert.equal(format('info@example.org'),'info@example.org');
+assert.equal(format('10 % a 20 Kč'),'10\u00a0% a\u00a020\u00a0Kč');
+assert.equal(format(format('30. 10. 2026 a v Praze')),format('30. 10. 2026 a v Praze'));
+console.log('Czech typography protects single letters, dates and units; preserves URLs and versions.');

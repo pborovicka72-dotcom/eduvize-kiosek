@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+const html=fs.readFileSync(new URL('../config.html',import.meta.url),'utf8');
+const source=html.match(/function segmentAllowed\([\s\S]*?\}(?=function segUrl)/)[0],context={};
+vm.runInNewContext(source+';this.allowed=segmentAllowed;',context);
+for(const [orientation,style,block] of [['portrait',3,2],['portrait',4,2],['landscape',5,1],['landscape',5,2],['landscape',5,3],['landscape',5,4],['landscape',7,1],['landscape',7,2],['landscape',7,3],['landscape',2,1]])assert.equal(context.allowed(3840,2160,orientation,style,block),false);
+assert.equal(context.allowed(2640,1480,'landscape',2,2),true);
+assert.equal(context.allowed(2160,1890,'portrait',4,3),true);
+console.log('Kiosk segment restrictions and valid alternatives passed.');

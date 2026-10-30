@@ -28,9 +28,9 @@ body.menu-layout.menu-right header{grid-column:2}
 body.menu-layout.menu-right #statusPanel{grid-column:1}
 body.menu-layout #tiles{grid-column:1;grid-row:2;grid-template-columns:repeat(var(--menu-cols,2),minmax(0,1fr));grid-template-rows:repeat(var(--menu-rows,4),var(--menu-row-size,minmax(0,1fr)));align-content:start;padding:0}
 body.menu-layout #contentFrame{grid-column:2;width:100%;height:100%}
-body.menu-layout #tiles .tile{container-type:size;display:grid;grid-template-rows:minmax(0,1fr) auto;justify-items:center;gap:2px;padding:4px;overflow:hidden}
-body.menu-layout #tiles .tile .app-icon{width:min(65cqw,48cqh);height:min(65cqw,48cqh);padding:3px;align-self:center}
-body.menu-layout #tiles .tile strong{font-size:clamp(8px,min(14cqw,15cqh),12px);line-height:1.1}
+body.menu-layout #tiles .tile{container-type:size;display:grid;grid-template-rows:minmax(0,1fr) auto;justify-items:center;gap:3px;padding:6px 7px 10px;overflow:hidden}
+body.menu-layout #tiles .tile .app-icon{width:auto;height:100%;max-height:min(60cqw,44cqh);max-width:100%;aspect-ratio:1;padding:3px;align-self:center}
+body.menu-layout #tiles .tile strong{width:100%;justify-self:center;font-size:clamp(8px,min(14cqw,15cqh),12px);line-height:1.1}
 body.menu-layout.menu-right .wrap{grid-template-columns:minmax(0,1fr) minmax(0,var(--menu-side,130px))}
 body.menu-right #tiles{grid-column:2}body.menu-right #contentFrame{grid-column:1}
 body.menu-layout:is(.menu-top,.menu-bottom) .wrap{grid-template-columns:minmax(0,1fr)}
@@ -46,7 +46,7 @@ body.tiles-home #tiles{grid-template-columns:repeat(var(--home-cols,3),minmax(0,
 
 /* Eduvize touch keyboard v20261027-6 */#touchKeyboard{position:fixed;left:50%;bottom:max(8px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(96vw,940px);z-index:9999;background:var(--ev-secondary);border:1px solid var(--ev-border);border-radius:18px;padding:12px;box-shadow:0 12px 40px #0003;display:none;touch-action:manipulation}#touchKeyboard.visible{display:block}#touchKeyboard .kb-row{display:flex;justify-content:center;gap:clamp(3px,.6vw,8px);margin:5px 0}#touchKeyboard button{min-width:0;flex:1;min-height:clamp(34px,5.5vh,55px);border:1px solid var(--ev-border);border-radius:8px;background:var(--ev-surface);color:var(--ev-text);font-size:clamp(14px,2vw,23px);font-weight:700;cursor:pointer}#touchKeyboard button.kb-special{background:var(--ev-secondary)}#touchKeyboard button.kb-wide{flex:4}body.keyboard-open .wrap{padding-bottom:clamp(190px,33vh,330px)}body.keyboard-open #contentFrame{min-height:0}body.segment-mode.keyboard-open .wrap{padding-bottom:clamp(150px,35cqh,320px)}@media(max-height:550px){#touchKeyboard{padding:5px}#touchKeyboard button{min-height:30px}#touchKeyboard .kb-row{margin:2px 0}}
 /* Scale only embedded content, keeping the kiosk navigation at 100%. */body.frame-open .wrap{position:relative}body.frame-open.zoom-frame #contentFrame{position:absolute;left:max(10px,env(safe-area-inset-left));top:var(--embedded-top,70px);width:calc((100% - 20px)/var(--embedded-scale,1));height:calc((var(--kiosk-visual-height,100dvh) - var(--embedded-top,70px) - 12px)/var(--embedded-scale,1));max-width:none;max-height:none;min-height:0;flex:none;transform:scale(var(--embedded-scale,1));transform-origin:top left}
-#navigationHeading{width:var(--navigation-heading-width,var(--menu-side,260px));min-width:0;max-width:75%;flex:0 1 auto}
+#navigationHeading{width:max-content;min-width:0;max-width:75%;flex:0 1 auto}
 .wrap>header .toolbar{flex-shrink:0;margin-left:auto}
 body.frame-open #pageContent{display:none}
 body:not(.menu-layout) .hero{display:none}

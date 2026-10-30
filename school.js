@@ -1,6 +1,8 @@
 /* School information is stored in the existing kiosk configuration. */
 (function (root) {
   'use strict';
+  const limits = {description:240,motto:80,additionalInfo:240};
+  const shorten=(text,max)=>text.length>max?text.slice(0,max-1).trimEnd()+'…':text;
   const fields = [
     ['name', 'Název školy', 'textarea'],
     ['motto', 'Motto nebo krátké představení', 'textarea'],
@@ -8,7 +10,6 @@
     ['address', 'Adresa', 'textarea'],
     ['phone', 'Telefon', 'tel'],
     ['email', 'E-mail', 'email'],
-    ['website', 'Web školy', 'url'],
     ['director', 'Ředitel / ředitelka', 'textarea'],
     ['officeHours', 'Úřední hodiny', 'textarea'],
     ['ico', 'IČO', 'text'],
@@ -31,12 +32,15 @@
     if (text !== undefined) element.textContent = text;
     return element;
   }
-  function render(host, config, openWebsite) {
+  function render(host, config) {
     const data = values(config);
+    for(const [key,limit] of Object.entries(limits))data[key]=shorten(data[key],limit);
     host.replaceChildren();
+    host.dataset.eduFit='';
+    const sheet=node('div','school-sheet');
     const intro = node('section', 'school-intro');
     const heading = node('div', 'school-intro-copy');
-    heading.append(node('p', 'school-eyebrow', 'Vítejte u nás'), node('h2', '', data.name || 'Naše škola'));
+    heading.append(node('h2', '', data.name || 'Naše škola'));
     if (data.motto) heading.append(node('p', 'school-motto', data.motto));
     intro.append(heading);
     const photo = webUrl(data.photo);
@@ -47,7 +51,7 @@
       image.onerror = () => image.remove();
       intro.append(image);
     }
-    host.append(intro);
+    sheet.append(intro);
     const grid = node('div', 'school-cards');
     function card(title, text, wide) {
       if (!text) return null;
@@ -57,23 +61,12 @@
       return section;
     }
     card('O škole', data.description, true);
-    if (data.address || data.phone || data.email || data.website) {
+    if (data.address || data.phone || data.email) {
       const contact = node('section', 'school-card');
       contact.append(node('h3', '', 'Adresa a kontakt'));
       if(data.address) contact.append(node('p', 'school-text school-address', data.address));
-      function link(label, href, action) {
-        const p = node('p', 'school-contact');
-        if (href) {
-          const a = node('a', '', label);
-          a.href = href;
-          if (action) a.onclick = event => { event.preventDefault(); action(href); };
-          p.append(a);
-        } else p.textContent = label;
-        contact.append(p);
-      }
-      if (data.phone) link(data.phone, /^[+\d\s()./-]+$/.test(data.phone) ? 'tel:' + data.phone.replace(/[^+\d]/g, '') : null);
-      if (data.email) link(data.email, /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email) ? 'mailto:' + data.email : null);
-      if (data.website) link(data.website, webUrl(data.website), openWebsite);
+      if(data.phone)contact.append(node('p','school-contact',data.phone));
+      if(data.email)contact.append(node('p','school-contact',data.email));
       grid.append(contact);
     }
     if (data.director || data.officeHours || data.ico) {
@@ -92,7 +85,8 @@
     if (!grid.children.length && !data.name && !data.motto && !photo) {
       card('Informace o škole', 'Informace o škole budou brzy doplněny.', true);
     }
-    host.append(grid);
+    sheet.append(grid);
+    host.append(sheet);
   }
   function editor(host, getConfig, onChange) {
     host.replaceChildren();
@@ -105,21 +99,27 @@
       if (type === 'textarea') input.rows = 1;
       else input.type = type;
       if (type === 'url') input.placeholder = 'https://…';
+      const counter=limits[key]?node('small','school-field-counter'):null;
+      const updateCounter=()=>{if(counter)counter.textContent=input.value.length+' / '+limits[key]+' znaků; delší uložený text se ve výstupu zkrátí.'};
+      if(limits[key])input.maxLength=limits[key];
       input.oninput = () => {
+        updateCounter();
         const config = getConfig();
         if (!config.school || typeof config.school !== 'object') config.school = {};
         config.school[key] = input.value;
         onChange();
       };
       controls[key] = input;
+      input.updateCounter=updateCounter;
       wrap.append(input);
+      if(counter)wrap.append(counter);
       grid.append(wrap);
     }
     host.append(grid);
     return {refresh() {
       const data = values(getConfig());
-      for (const [key, input] of Object.entries(controls)) input.value = data[key];
+      for (const [key, input] of Object.entries(controls)) {input.value = data[key];input.updateCounter();}
     }};
   }
-  root.EduvizeSchool = Object.freeze({values, webUrl, render, editor});
+  root.EduvizeSchool = Object.freeze({values, webUrl, render, editor, limits});
 })(window);

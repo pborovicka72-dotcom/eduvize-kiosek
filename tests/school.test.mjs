@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 class Element {
-  constructor(tag) { this.tagName = tag; this.children = []; this.textContent = ''; }
+  constructor(tag) { this.tagName = tag; this.children = []; this.textContent = ''; this.dataset = {}; }
   append(...children) { this.children.push(...children); }
   replaceChildren(...children) { this.children = children; }
   remove() { this.removed = true; }
@@ -28,9 +28,11 @@ assert.ok(all(host).some(e => e.textContent === config.school.name));
 assert.equal(all(host).filter(e => e.tagName === 'script').length, 0);
 assert.equal(all(host).filter(e => e.tagName === 'img').length, 0);
 assert.equal(all(host).some(e => e.textContent === 'Úřední hodiny'), false);
-const web = all(host).find(e => e.href === 'https://example.org/');
-web.onclick({preventDefault() {}});
-assert.equal(opened, 'https://example.org/');
+assert.equal(all(host).filter(e => e.tagName === 'a').length, 0);
+assert.equal(all(host).some(e => e.textContent === config.school.website), false);
+school.render(host, {school:{description:'x'.repeat(400)}});
+const description=all(host).find(e=>e.className==='school-text');
+assert.equal(description.textContent.length, school.limits.description);
 
 let changes = 0;
 const editor = new Element('div');

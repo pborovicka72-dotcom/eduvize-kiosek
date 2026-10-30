@@ -2,14 +2,14 @@
 (function (root) {
   'use strict';
   const fields = [
-    ['name', 'Název školy', 'text'],
-    ['motto', 'Motto nebo krátké představení', 'text'],
+    ['name', 'Název školy', 'textarea'],
+    ['motto', 'Motto nebo krátké představení', 'textarea'],
     ['description', 'O škole', 'textarea'],
     ['address', 'Adresa', 'textarea'],
     ['phone', 'Telefon', 'tel'],
     ['email', 'E-mail', 'email'],
     ['website', 'Web školy', 'url'],
-    ['director', 'Ředitel / ředitelka', 'text'],
+    ['director', 'Ředitel / ředitelka', 'textarea'],
     ['officeHours', 'Úřední hodiny', 'textarea'],
     ['ico', 'IČO', 'text'],
     ['additionalInfo', 'Další informace pro návštěvníky', 'textarea'],

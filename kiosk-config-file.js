@@ -11,7 +11,7 @@
       ids.add(page.id);text(page.title,'Název podstránky');text(page.subtitle,'Podtitulek');
       if(!Array.isArray(page.buttons)||page.buttons.length>200)throw Error('Neplatný seznam tlačítek.');
       total+=page.buttons.length;if(total>5000)throw Error('Konfigurace obsahuje příliš mnoho tlačítek.');
-      for(const button of page.buttons){if(!button||!['page','url','app','document'].includes(button.type)||typeof button.target!=='string')throw Error('Neplatná akce tlačítka.');text(button.label,'Název tlačítka');}
+      for(const button of page.buttons){if(!button||!['page','url','app','document','image'].includes(button.type)||typeof button.target!=='string')throw Error('Neplatná akce tlačítka.');text(button.label,'Název tlačítka');}
       if(page.content!==undefined){
         if(!page.content||typeof page.content!=='object'||!Array.isArray(page.content.sections)||page.content.sections.length>100)throw Error('Neplatná struktura obsahu.');
         text(page.content.intro,'Úvod');text(page.content.image,'Obrázek úvodu');text(page.content.imageAlt,'Popis obrázku');for(const section of page.content.sections){if(!section||typeof section!=='object')throw Error('Neplatná obsahová sekce.');text(section.title,'Nadpis sekce');text(section.text,'Text sekce');for(const key of ['image','imageAlt','link','linkLabel'])text(section[key],'Údaj sekce');}

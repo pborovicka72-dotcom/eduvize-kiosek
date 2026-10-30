@@ -39,3 +39,5 @@ Dokumenty využívají sdílený `document-viewport.js/css` pro skutečné zvět
 Kresby ikon aplikací načítají administrace i výstup z centrálního `design-system/app-icons.js`. Ikona Moudrost dne má vyrovnané okraje v souřadnicích SVG; není posunuta pomocí CSS.
 
 Celoplošná nabídka rozděluje skutečně zobrazené dlaždice do vyvážených řad. Každá řada vyplní celou šířku, řady celou výšku, bez prázdných buněk. Výška stavové lišty se odvozuje samostatně od rozměru výstupu.
+
+Pro odkaz na obrázek bez přípony slouží akce `image` (Obrázek URL). Běžné přípony a obrazové adresy se rozpoznají automaticky. Přímé obrazové odkazy otevírá sdílený `design-system/image-viewer.html`; stejnou komponentu `mountImage` z `document-viewport.js` používají Dokumenty. Ovládání nabízí celý obrázek, šířku, zoom, posouvání a celou obrazovku. Přehled PDF volí 1–3 strany podle zaplněné plochy.

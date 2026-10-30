@@ -47,3 +47,9 @@ for (const name of ['index.html', 'config.html']) {
   }
 }
 console.log('Kiosk application routing and example configurations passed.');
+
+const picture={type:'url',target:'https://example.org/picture.PNG?size=large',zoom:60};apps.normalize({pages:[{buttons:[picture]}]});assert.equal(picture.type,'image');assert.equal(picture.zoom,undefined);
+assert.equal(apps.resolve(picture).searchParams.get('src'),'https://example.org/picture.PNG?size=large');
+assert.equal(apps.resolve({type:'image',target:'https://example.org/image?id=1'}).searchParams.get('src'),'https://example.org/image?id=1');
+assert.equal(apps.resolve({type:'image',target:'javascript:alert(1)'}),null);
+assert.equal(apps.resolve({type:'url',target:'https://eduvize-dokumenty-api.onrender.com/api/documents/example/file'}).searchParams.get('document'),'example');

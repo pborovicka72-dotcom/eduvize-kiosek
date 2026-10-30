@@ -1,7 +1,8 @@
 (function () {
   function fit(field) {
-    field.style.height = 'auto';
-    field.style.height = Math.max(80, field.scrollHeight + 2) + 'px';
+    field.rows = 1;
+    field.style.setProperty('height', '0px', 'important');
+    field.style.setProperty('height', Math.max(44, field.scrollHeight + 2) + 'px', 'important');
   }
   const fields = () => document.querySelectorAll('textarea:not([readonly])');
   const refresh = () => fields().forEach(fit);

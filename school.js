@@ -93,7 +93,7 @@
       const wrap = node('label', 'edu-admin__field' + (type === 'textarea' ? ' school-editor-wide' : ''), label);
       const input = node(type === 'textarea' ? 'textarea' : 'input');
       input.id = 'school-' + key;
-      if (type === 'textarea') input.rows = key === 'description' ? 5 : 3;
+      if (type === 'textarea') input.rows = 1;
       else input.type = type;
       if (type === 'url') input.placeholder = 'https://…';
       input.oninput = () => {

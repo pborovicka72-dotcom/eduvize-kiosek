@@ -22,4 +22,10 @@ Změny administrace nesmějí neúmyslně ovlivnit zobrazení samotného Kiosku.
 
 Administrace ukládá a načítá pojmenované konfigurace přes existující službu Dokumenty, se stejným administračním klíčem a připojením Microsoftu. Soubory jsou v `Eduvize-Dokumenty/_Eduvize-system/Kiosek/<název>.json`; nejsou součástí veřejného katalogu dokumentů. Před přepsáním se uloží `<název>.previous.json`. Klíč je pouze v paměti stránky, nikdy v konfiguraci, URL ani localStorage. Čtení i zápis vyžadují autorizaci. JSON stažení zůstává doplňkovou zálohou.
 
-Obrázky úvodu a sekcí mají vlastní ohraničený box vlevo vedle textu. Nedostupné obrázky se skryjí. Popisy obrázků a názvy odkazů se již nezadávají; přístupný název obrázku vychází z nadpisu a odkaz na podrobnosti má podobu malé sponky.
+Obrázky sekcí mají vlastní ohraničený box vlevo vedle textu a vyplňují ho ořezem (`object-fit: cover`). Samostatný úvodní obrázek a text se již nezobrazují ani needitují; dříve uložená data zůstávají v konfiguraci kvůli zpětné kompatibilitě. Nedostupné obrázky se skryjí. Popisy obrázků a názvy odkazů se již nezadávají; přístupný název obrázku vychází z nadpisu a odkaz na podrobnosti má podobu malé sponky.
+
+### Kompaktní stránky a stavový panel
+
+Sdílené `EduvizePagedPanel.mountFlow` seskupuje celé obsahové sekce podle skutečné výšky a přepočítává stránky při změně velikosti okna a načtení obrázku. Stránkování se objeví pouze při nedostatku prostoru. Jedna nadměrně dlouhá sekce využije stávající přizpůsobení velikosti.
+
+Přepínač `showInfoPanel` zobrazí nad aplikací logo Eduvize, místní datum a čas přes sdílenou komponentu `status-panel`. Ve výchozím stavu je vypnutý: v bočním rozložení pak aplikace vyplní i prostor od horní hrany vedle názvu nabídky. Preference se přenáší v JSON i OneDrive konfiguraci. Sdílený Newline picker podporuje volbu `interactivePreview`; Kiosek ji zapíná pro ovládání živého náhledu.

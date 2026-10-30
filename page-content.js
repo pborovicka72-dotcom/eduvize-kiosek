@@ -1,19 +1,18 @@
 /* Structured plain-text content; no HTML is stored or evaluated. */
 (function(root){
-  const limits={intro:400,title:100,text:1600};
+  const limits={title:100,text:1600};
   function node(tag,className,text){const e=document.createElement(tag);e.className=className||'';if(text!==undefined)e.textContent=text;return e;}
   function safeUrl(value){try{const u=new URL(value);return ['https:','http:'].includes(u.protocol)?u.href:null;}catch{return null;}}
   function image(parent,url,alt){const src=safeUrl(url);if(!src)return;const box=node('figure','page-image-box'),img=node('img','page-section-image');img.alt=alt||'';box.hidden=true;img.onload=()=>{box.hidden=false;root.EduvizeFitPanel?.refresh();};img.onerror=()=>{box.hidden=true;root.EduvizeFitPanel?.refresh();};box.append(img);parent.append(box);img.src=src;}
   function render(host,page,onOpen){
     const content=page.content||{};
     const sections=(content.sections||[]).filter(section=>section.title||section.text||safeUrl(section.image)||safeUrl(section.link));
-    const segments=sections.length?sections:[null];
-    const hasContent=!!(content.intro||safeUrl(content.image)||sections.length);
+    const segments=sections;
+    const hasContent=sections.length>0;
     if(!hasContent){host.replaceChildren();return false;}
-    root.EduvizePagedPanel.mount(host,segments,{key:page.id,label:'Stránkování podstránky',render:(sheet,section,index)=>{
+    root.EduvizePagedPanel.mountFlow(host,segments,{key:page.id,label:'Stránkování podstránky',render:(sheet,items)=>{
       sheet.className='edu-paged-content page-content-sheet';
-      if(index===0&&(content.intro||safeUrl(content.image))){const row=node('div','page-content-row');image(row,content.image,page.title);if(content.intro)row.append(node('p','page-intro edu-content-intro',String(content.intro)));sheet.append(row);}
-      if(!section)return;
+      for(const section of items){
       const row=node('div','page-content-row');
       image(row,section.image,section.title||page.title);
       const card=node('section','page-section');
@@ -22,6 +21,7 @@
       const link=safeUrl(section.link);
       if(link){const button=node('button','page-section-link','📎');button.type='button';button.title='Otevřít podrobnosti';button.setAttribute('aria-label','Otevřít podrobnosti'+(section.title?' – '+section.title:''));button.onclick=()=>onOpen?.(link);card.append(button);}
       if(card.children.length)row.append(card);sheet.append(row);
+      }
     }});
     return true;
   }
@@ -29,17 +29,15 @@
     host.replaceChildren();
     host.hidden=page.id==='home'||page.id==='school';
     if(host.hidden)return;
-    page.content ||= {intro:'',sections:[]};
+    page.content ||= {sections:[]};
     const content=page.content;
     if(!Array.isArray(content.sections))content.sections=[];
-    host.append(node('h2','','Obsah podstránky'),node('p','help','Každá obsahová sekce je samostatná stránka kiosku. Může mít obrázek před textem a vlastní odkaz. Úvod je na první stránce. Spodní tlačítka jsou volitelné rychlé akce.'));
+    host.append(node('h2','','Obsah podstránky'),node('p','help','Sekce mají obrázek vlevo, nadpis, text a volitelný odkaz na podrobnosti. Na jednu stránku se seskupí tolik celých sekcí, kolik se jich vejde. Spodní tlačítka jsou volitelné rychlé akce.'));
     function field(parent,label,value,max,change,textarea){
       const wrap=node('label','edu-admin__field',label),input=node(textarea?'textarea':'input');
       input.value=value||'';input.maxLength=max;if(textarea)input.rows=1;
       input.oninput=()=>{change(input.value);onChange();};wrap.append(input);parent.append(wrap);
     }
-    field(host,'Obrázek úvodu (URL)',content.image,2048,value=>content.image=value,false);
-    field(host,'Úvodní text',content.intro,limits.intro,value=>content.intro=value,true);
     content.sections.forEach((section,index)=>{
       const card=node('div','buttonEditor');
       card.append(node('h3','','Sekce '+(index+1)));

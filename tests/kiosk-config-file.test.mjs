@@ -4,7 +4,7 @@ import vm from 'node:vm';
 const scope={window:{}};
 vm.runInNewContext(fs.readFileSync(new URL('../kiosk-config-file.js',import.meta.url),'utf8'),scope);
 const format=scope.window.EduvizeKioskConfigFile;
-const original={title:'Škola Žďár',idleSeconds:60,school:{name:'Základní škola'},pages:[{id:'home',title:'Nabídka',buttons:[{type:'page',label:'Rodiče',target:'parents'}]},{id:'parents',title:'Pro rodiče',buttons:[{type:'document',target:'https://example.org/file.pdf',label:'Formulář'}],content:{intro:'Úvod',sections:[{title:'Kontakty',text:'Text\ns diakritikou'}]}}]};
+const original={showInfoPanel:true,title:'Škola Žďár',idleSeconds:60,school:{name:'Základní škola'},pages:[{id:'home',title:'Nabídka',buttons:[{type:'page',label:'Rodiče',target:'parents'}]},{id:'parents',title:'Pro rodiče',buttons:[{type:'document',target:'https://example.org/file.pdf',label:'Formulář'}],content:{intro:'Úvod',sections:[{title:'Kontakty',text:'Text\ns diakritikou'}]}}]};
 assert.deepEqual(JSON.parse(JSON.stringify(format.parse(format.stringify(original)))),original);
 assert.equal(format.parse(JSON.stringify(original)).pages.length,2);
 assert.throws(()=>format.parse('{'));

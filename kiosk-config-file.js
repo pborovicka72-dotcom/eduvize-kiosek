@@ -1,6 +1,6 @@
 /* Portable kiosk data only: upload credentials are never part of this schema. */
 (function(root){
-  const keys=['title','subtitle','idleSeconds','pages','school','menuLayout','menuPosition','defaultApp','keyboardMode','layoutOrientation','layoutStyle','layoutBlock','outputType'];
+  const keys=['showInfoPanel','title','subtitle','idleSeconds','pages','school','menuLayout','menuPosition','defaultApp','keyboardMode','layoutOrientation','layoutStyle','layoutBlock','outputType'];
   function validate(data){
     if(!data||typeof data!=='object'||Array.isArray(data))throw Error('Soubor neobsahuje konfiguraci kiosku.');
     if(!Array.isArray(data.pages)||!data.pages.length||data.pages.length>200)throw Error('Chybí platný seznam podstránek.');
@@ -20,6 +20,7 @@
     if(!ids.has('home'))throw Error('Chybí hlavní nabídka home.');
     for(const key of ['title','subtitle','menuPosition','defaultApp','keyboardMode','layoutOrientation','outputType'])text(data[key],key);
     if(data.idleSeconds!==undefined&&(!Number.isFinite(data.idleSeconds)||data.idleSeconds<0))throw Error('Neplatný čas návratu.');
+    if(data.showInfoPanel!==undefined&&typeof data.showInfoPanel!=='boolean')throw Error('Zobrazení panelu musí být zapnuté nebo vypnuté.');
     if(data.school!==undefined){if(!data.school||typeof data.school!=='object'||Array.isArray(data.school))throw Error('Neplatné údaje školy.');for(const value of Object.values(data.school))if(typeof value!=='string')throw Error('Údaje školy musí být text.');}
     return Object.fromEntries(keys.filter(key=>data[key]!==undefined).map(key=>[key,data[key]]));
   }

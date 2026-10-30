@@ -22,11 +22,11 @@ body.menu-layout .wrap{display:grid;grid-template-columns: minmax(0,var(--menu-s
 body.menu-layout header{grid-column:1/-1;grid-row:1}
 body.menu-layout .hero{grid-column:1;grid-row:2;container-type:inline-size}
 body.menu-layout .hero h2{font-size:clamp(10px,9cqw,24px)}body.menu-layout .hero p{font-size:clamp(8px,6cqw,15px)}
-body.menu-layout #tiles{grid-column:1;grid-row:3;grid-template-columns:repeat(var(--menu-cols,2),minmax(0,1fr));grid-template-rows:repeat(var(--menu-rows,4),minmax(0,1fr));padding:3px}
+body.menu-layout #tiles{grid-column:1;grid-row:3;grid-template-columns:repeat(var(--menu-cols,2),minmax(0,1fr));grid-template-rows:repeat(var(--menu-rows,4),var(--menu-row-size,minmax(0,1fr)));align-content:start;padding:3px}
 body.menu-layout #contentFrame{grid-column:2;grid-row:2/4;width:100%;height:100%}
 body.menu-layout #tiles .tile{container-type:size;display:grid;grid-template-rows:minmax(0,1fr) auto;justify-items:center;gap:2px;padding:4px;overflow:hidden}
 body.menu-layout #tiles .tile .app-icon{width:min(65cqw,48cqh);height:min(65cqw,48cqh);padding:3px;align-self:center}
-body.menu-layout #tiles .tile strong{font-size:clamp(7px,min(15cqw,18cqh),18px);line-height:1.1}
+body.menu-layout #tiles .tile strong{font-size:clamp(7px,min(12cqw,14cqh),15px);line-height:1.1}
 body.menu-layout.menu-right .wrap{grid-template-columns:minmax(0,1fr) minmax(0,var(--menu-side,240px))}
 body.menu-right .hero,body.menu-right #tiles{grid-column:2}body.menu-right #contentFrame{grid-column:1}
 body.menu-layout:is(.menu-top,.menu-bottom) .wrap{grid-template-columns:minmax(0,1fr)}

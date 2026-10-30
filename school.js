@@ -57,10 +57,10 @@
       return section;
     }
     card('O škole', data.description, true);
-    card('Kde nás najdete', data.address);
-    if (data.phone || data.email || data.website) {
+    if (data.address || data.phone || data.email || data.website) {
       const contact = node('section', 'school-card');
-      contact.append(node('h3', '', 'Kontakt'));
+      contact.append(node('h3', '', 'Adresa a kontakt'));
+      if(data.address) contact.append(node('p', 'school-text school-address', data.address));
       function link(label, href, action) {
         const p = node('p', 'school-contact');
         if (href) {
@@ -76,9 +76,18 @@
       if (data.website) link(data.website, webUrl(data.website), openWebsite);
       grid.append(contact);
     }
-    card('Vedení školy', data.director);
-    card('Úřední hodiny', data.officeHours);
-    card('IČO', data.ico);
+    if (data.director || data.officeHours || data.ico) {
+      const details = node('section', 'school-card');
+      details.append(node('h3', '', 'Vedení a provoz'));
+      const facts = node('dl', 'school-facts');
+      for(const [label,value] of [['Ředitel / ředitelka',data.director],['Úřední hodiny',data.officeHours],['IČO',data.ico]]) {
+        if(!value) continue;
+        const row=node('div','school-fact');
+        row.append(node('dt','',label),node('dd','school-text',value));
+        facts.append(row);
+      }
+      details.append(facts);grid.append(details);
+    }
     card('Pro návštěvníky', data.additionalInfo, true);
     if (!grid.children.length && !data.name && !data.motto && !photo) {
       card('Informace o škole', 'Informace o škole budou brzy doplněny.', true);

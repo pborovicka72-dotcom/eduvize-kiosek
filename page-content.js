@@ -5,7 +5,7 @@
   function render(host,page){
     host.replaceChildren();
     const content=page.content||{};
-    if(content.intro)host.append(node('p','page-intro',String(content.intro)));
+    if(content.intro)host.append(node('p','page-intro edu-content-intro',String(content.intro)));
     for(const section of content.sections||[]){
       if(!section.title&&!section.text)continue;
       const card=node('section','page-section');

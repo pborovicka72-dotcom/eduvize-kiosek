@@ -1,0 +1,20 @@
+/* Reserve readable tile sizes; scroll the menu when the viewport is too short. */
+body.menu-layout .wrap{grid-template-rows:auto auto minmax(0,1fr)!important}
+body.menu-layout .wrap>.hero{grid-column:1!important;grid-row:2!important;min-width:0;padding:10px!important}
+body.menu-layout .wrap>#tiles{grid-column:1!important;grid-row:3!important;overflow:auto!important;grid-template-rows:repeat(var(--menu-rows,1),minmax(76px,1fr))!important;align-content:start!important}
+body.menu-layout .wrap>#contentFrame{grid-column:2!important;grid-row:2 / 4!important}
+body.menu-layout.menu-right .wrap>.hero,body.menu-layout.menu-right .wrap>#tiles{grid-column:2!important}
+body.menu-layout.menu-right .wrap>#contentFrame{grid-column:1!important}
+body.menu-layout .wrap>#tiles .tile{display:grid!important;grid-template-rows:minmax(24px,1fr) auto;justify-items:center;align-items:center;align-self:stretch!important;border-radius:var(--ev-card-radius,16px);gap:4px!important;padding:7px!important}
+body.menu-layout .wrap>#tiles .tile .app-icon{width:32px!important;height:32px!important;max-height:none!important;padding:4px!important;flex-shrink:0}
+body.menu-layout .wrap>#tiles .tile strong{font-size:clamp(12px,1.2vw,18px)!important;line-height:1.25!important;white-space:normal;overflow-wrap:anywhere;max-width:100%}
+body.menu-layout.menu-top .wrap{grid-template-rows:auto auto minmax(0,var(--menu-band,170px)) minmax(0,1fr)!important}
+body.menu-layout.menu-top .wrap>.hero{grid-column:1!important;grid-row:2!important}
+body.menu-layout.menu-top .wrap>#tiles{grid-column:1!important;grid-row:3!important}
+body.menu-layout.menu-top .wrap>#contentFrame{grid-column:1!important;grid-row:4!important}
+body.menu-layout.menu-bottom .wrap{grid-template-rows:auto minmax(0,1fr) auto minmax(0,var(--menu-band,170px))!important}
+body.menu-layout.menu-bottom .wrap>.hero{grid-column:1!important;grid-row:3!important}
+body.menu-layout.menu-bottom .wrap>#tiles{grid-column:1!important;grid-row:4!important}
+body.menu-layout.menu-bottom .wrap>#contentFrame{grid-column:1!important;grid-row:2!important}
+body.tiles-home .wrap>#tiles{overflow:auto!important;grid-template-rows:repeat(var(--home-rows,1),minmax(110px,1fr))!important;align-items:stretch!important}
+body.tiles-home .wrap>#tiles .tile{width:100%!important;align-self:stretch;justify-self:stretch}

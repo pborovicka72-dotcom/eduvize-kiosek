@@ -3,7 +3,7 @@
 :root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ev-text)}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;min-height:0;overflow:hidden;overscroll-behavior:none}
 body{background:var(--ev-bg)}
-.wrap{width:100%;height:var(--kiosk-visual-height,100dvh);min-height:0;display:flex;flex-direction:column;gap:clamp(12px,2vmin,24px);padding:clamp(6px,1vmin,14px)}
+.wrap{width:100%;height:var(--kiosk-visual-height,100dvh);min-height:0;display:flex;flex-direction:column;gap:var(--kiosk-space,clamp(12px,2vmin,24px));padding:clamp(6px,1vmin,14px)}
 .wrap>header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex:none;position:relative;z-index:30;margin:0}
 #fullscreen{display:none}
 .toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
@@ -18,23 +18,21 @@ body{background:var(--ev-bg)}
 #contentFrame{flex:1;width:100%;min-height:0;border:0;border-radius:0;outline:0;box-shadow:none;background:transparent}
 .hidden{display:none!important}
 body.frame-open:not(.menu-layout) .hero,body.frame-open:not(.menu-layout) #tiles{display:none}
-body.menu-layout .wrap{display:grid;grid-template-columns: minmax(0,var(--menu-side,240px)) minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr)}
+body.menu-layout .wrap{display:grid;grid-template-columns: minmax(0,var(--menu-side,240px)) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
 body.menu-layout header{grid-column:1/-1;grid-row:1}
-body.menu-layout .hero{grid-column:1;grid-row:2;container-type:inline-size}
-body.menu-layout .hero h2{font-size:clamp(10px,9cqw,24px)}body.menu-layout .hero p{font-size:clamp(8px,6cqw,15px)}
-body.menu-layout #tiles{grid-column:1;grid-row:3;grid-template-columns:repeat(var(--menu-cols,2),minmax(0,1fr));grid-template-rows:repeat(var(--menu-rows,4),var(--menu-row-size,minmax(0,1fr)));align-content:start;padding:3px}
-body.menu-layout #contentFrame{grid-column:2;grid-row:2/4;width:100%;height:100%}
+body.menu-layout #tiles{grid-column:1;grid-row:2;grid-template-columns:repeat(var(--menu-cols,2),minmax(0,1fr));grid-template-rows:repeat(var(--menu-rows,4),var(--menu-row-size,minmax(0,1fr)));align-content:start;padding:0}
+body.menu-layout #contentFrame{grid-column:2;grid-row:2;width:100%;height:100%}
 body.menu-layout #tiles .tile{container-type:size;display:grid;grid-template-rows:minmax(0,1fr) auto;justify-items:center;gap:2px;padding:4px;overflow:hidden}
 body.menu-layout #tiles .tile .app-icon{width:min(65cqw,48cqh);height:min(65cqw,48cqh);padding:3px;align-self:center}
 body.menu-layout #tiles .tile strong{font-size:clamp(7px,min(12cqw,14cqh),15px);line-height:1.1}
 body.menu-layout.menu-right .wrap{grid-template-columns:minmax(0,1fr) minmax(0,var(--menu-side,240px))}
-body.menu-right .hero,body.menu-right #tiles{grid-column:2}body.menu-right #contentFrame{grid-column:1}
+body.menu-right #tiles{grid-column:2}body.menu-right #contentFrame{grid-column:1}
 body.menu-layout:is(.menu-top,.menu-bottom) .wrap{grid-template-columns:minmax(0,1fr)}
-body.menu-layout.menu-top .wrap{grid-template-rows:auto auto minmax(0,var(--menu-band,170px)) minmax(0,1fr)}
-body.menu-layout.menu-bottom .wrap{grid-template-rows:auto minmax(0,1fr) auto minmax(0,var(--menu-band,170px))}
-body.menu-layout:is(.menu-top,.menu-bottom) :is(.hero,#tiles,#contentFrame){grid-column:1}
-body.menu-top .hero{grid-row:2}body.menu-top #tiles{grid-row:3}body.menu-top #contentFrame{grid-row:4}
-body.menu-bottom .hero{grid-row:3}body.menu-bottom #tiles{grid-row:4}body.menu-bottom #contentFrame{grid-row:2}
+body.menu-layout.menu-top .wrap{grid-template-rows:auto minmax(0,var(--menu-band,170px)) minmax(0,1fr)}
+body.menu-layout.menu-bottom .wrap{grid-template-rows:auto minmax(0,1fr) minmax(0,var(--menu-band,170px))}
+body.menu-layout:is(.menu-top,.menu-bottom) :is(#tiles,#contentFrame){grid-column:1}
+body.menu-top #tiles{grid-row:2}body.menu-top #contentFrame{grid-row:3}
+body.menu-bottom #tiles{grid-row:3}body.menu-bottom #contentFrame{grid-row:2}
 body.tiles-home #tiles{grid-template-columns:repeat(var(--home-cols,3),minmax(0,1fr));grid-template-rows:repeat(var(--home-rows,2),minmax(90px,1fr))}
 @media(max-width:600px){body:not(.menu-layout):not(.tiles-home) .grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 

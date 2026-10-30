@@ -4,16 +4,19 @@
   function node(tag,className,text){const e=document.createElement(tag);e.className=className||'';if(text!==undefined)e.textContent=text;return e;}
   function render(host,page){
     host.replaceChildren();
+    host.dataset.eduFit='';
+    const sheet=node('div','page-content-sheet');
     const content=page.content||{};
-    if(content.intro)host.append(node('p','page-intro edu-content-intro',String(content.intro)));
+    if(content.intro)sheet.append(node('p','page-intro edu-content-intro',String(content.intro)));
     for(const section of content.sections||[]){
       if(!section.title&&!section.text)continue;
       const card=node('section','page-section');
       if(section.title)card.append(node('h2','',String(section.title)));
       if(section.text)card.append(node('p','',String(section.text)));
-      host.append(card);
+      sheet.append(card);
     }
-    return host.children.length>0;
+    if(sheet.children.length)host.append(sheet);
+    return sheet.children.length>0;
   }
   function editor(host,page,onChange){
     host.replaceChildren();

@@ -1,18 +1,18 @@
 /* Layout uses the active Eduvize theme inherited from the kiosk. */
-#schoolContent {flex:1 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain;padding:0 2px 14px;scrollbar-gutter:stable}
+#schoolContent {flex:1 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain;padding:0 2px 2px;scrollbar-gutter:stable}
 #schoolContent[hidden] {display:none}
-.school-intro {display:flex;align-items:center;justify-content:space-between;gap:clamp(18px,3vw,40px);padding:clamp(20px,4vmin,48px);border-radius:var(--ev-card-radius,20px);background:var(--ev-primary);color:var(--ev-primary-text,#fff);margin-bottom:clamp(12px,2vmin,24px)}
+.school-intro {display:flex;align-items:center;justify-content:space-between;gap:16px;padding:clamp(12px,2vmin,22px);border-radius:var(--ev-card-radius,20px);background:var(--ev-primary);color:var(--ev-primary-text,#fff);margin-bottom:10px}
 .school-intro-copy {flex:1;min-width:0}
-.school-eyebrow {font-size:13px;font-weight:750;letter-spacing:.12em;text-transform:uppercase;margin:0 0 12px;opacity:.85}
-.school-intro h2 {font-size:clamp(26px,4vw,54px);line-height:1.12;letter-spacing:-.025em;margin:0;overflow-wrap:anywhere}
-.school-motto {font-size:clamp(16px,1.8vw,23px);line-height:1.5;margin:16px 0 0;white-space:pre-line}
-.school-photo {width:36%;max-height:260px;object-fit:cover;border-radius:var(--ev-card-radius,20px);align-self:stretch}
-.school-cards {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(12px,2vmin,24px)}
-.school-card {min-width:0;padding:clamp(18px,2.6vmin,30px);background:var(--ev-surface);color:var(--ev-text);border:1px solid var(--ev-border);border-radius:var(--ev-card-radius,20px)}
+.school-eyebrow {font-size:11px;font-weight:750;letter-spacing:.12em;text-transform:uppercase;margin:0 0 6px;opacity:.85}
+.school-intro h2 {font-size:clamp(22px,3vw,38px);line-height:1.12;letter-spacing:-.025em;margin:0;overflow-wrap:anywhere}
+.school-motto {font-size:clamp(13px,1.5vw,18px);line-height:1.3;margin:8px 0 0;white-space:pre-line}
+.school-photo {width:25%;max-height:125px;object-fit:cover;border-radius:var(--ev-card-radius,20px);align-self:stretch}
+.school-cards {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.school-card {min-width:0;padding:clamp(10px,1.5vmin,18px);background:var(--ev-surface);color:var(--ev-text);border:1px solid var(--ev-border);border-radius:var(--ev-card-radius,20px)}
 .school-card-wide {grid-column:1/-1}
-.school-card h3 {font-size:clamp(18px,2vw,25px);margin:0 0 12px;color:var(--ev-primary)}
-.school-text,.school-contact {font-size:clamp(16px,1.6vw,21px);line-height:1.6;white-space:pre-line;overflow-wrap:anywhere;margin:0}
-.school-contact a {display:inline-block;min-height:44px;padding:6px 0;text-underline-offset:4px}
+.school-card h3 {font-size:clamp(15px,1.6vw,20px);margin:0 0 6px;color:var(--ev-primary)}
+.school-text,.school-contact {font-size:clamp(13px,1.25vw,17px);line-height:1.35;white-space:pre-line;overflow-wrap:anywhere;margin:0}
+.school-contact a {display:inline-block;min-height:30px;padding:3px 0;text-underline-offset:4px}
 body.school-open .wrap>#hero {display:none!important}
 body.school-open .wrap>#tiles {flex:0 0 auto;display:flex;flex-wrap:wrap;gap:8px;overflow:auto;max-height:26vh}
 body.school-open .wrap>#tiles .tile {flex:0 1 auto;min-height:44px;padding:8px 18px;flex-direction:row;gap:10px}
@@ -21,27 +21,13 @@ body.school-open .wrap>#tiles .tile strong {font-size:16px}
 body.school-open.frame-open #schoolContent {display:none}
 body.school-open.frame-open .wrap>#tiles {display:none!important}
 .school-editor-wide {grid-column:1/-1}
-.school-editor-grid textarea {width:100%;resize:vertical;min-height:44px}
+.school-editor-grid textarea {width:100%}
 @media(max-width:600px) {
-  .school-intro {flex-direction:column;align-items:stretch}
-  .school-photo {width:100%;max-height:200px}
-  .school-cards {grid-template-columns:1fr}
-  .school-card-wide {grid-column:auto}
+  .school-intro {flex-direction:row;align-items:center}
+  .school-photo {width:25%;max-height:100px}
+  .school-cards {grid-template-columns:repeat(2,minmax(0,1fr))}
+  .school-card-wide {grid-column:1/-1}
 }
 
-/* Compact information layout keeps the usual school profile in one viewport. */
-#schoolContent{padding-bottom:2px;container-type:inline-size}
-.school-intro{padding:clamp(12px,2vmin,22px);gap:16px;margin-bottom:10px}
-.school-eyebrow{font-size:11px;margin-bottom:6px}
-.school-intro h2{font-size:clamp(22px,3vw,38px)}
-.school-motto{font-size:clamp(13px,1.5vw,18px);line-height:1.3;margin-top:8px}
-.school-photo{max-height:125px;width:25%}
-.school-cards{gap:10px;align-items:start}
-.school-card{padding:clamp(10px,1.5vmin,18px)}
-.school-card h3{font-size:clamp(15px,1.6vw,20px);margin-bottom:5px}
-.school-text,.school-contact{font-size:clamp(13px,1.25vw,17px);line-height:1.35}
-.school-contact a{min-height:30px;padding:3px 0}
-@media(min-width:850px){.school-cards{grid-template-columns:repeat(3,minmax(0,1fr))}.school-card-wide{grid-column:span 3}}
-@media(max-width:600px){.school-intro{flex-direction:row}.school-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.school-card-wide{grid-column:1/-1}.school-photo{width:25%;max-height:100px}}
 
-@media(min-width:850px){.school-card-visitors{grid-column:span 2}}
+@media(min-width:850px){.school-cards{grid-template-columns:repeat(3,minmax(0,1fr))}.school-card-wide{grid-column:span 3}.school-card-visitors{grid-column:span 2}}

@@ -9,7 +9,7 @@ Samostatná interaktivní aplikace Eduvize pro školní dotykové obrazovky. Kio
 Konfigurace nabídky a tlačítek se spravuje v administraci. Při změnách je třeba ověřit uložení a obnovení konfigurace, režimy rozložení, dotykové ovládání a náhled.
 
 ## O škole
-Sekce **O škole** v administraci upravuje název, motto, představení, adresu, kontakty, vedení, úřední hodiny, IČO, informace pro návštěvníky a volitelnou fotografii. Data jsou v objektu `school` stávající konfigurace `eduvize-kiosk-v1`, včetně sdílených odkazů. Podstránka má ID `school`; tlačítko náhledu ji umí znovu vytvořit. Nevyplněná pole se ve výstupu nezobrazují. Text se vykresluje jako prostý text a web školy se otevírá uvnitř Kiosku.
+Sekce **O škole** v administraci upravuje název, motto, představení, adresu, kontakty, vedení, úřední hodiny, IČO, informace pro návštěvníky a volitelnou fotografii. Data jsou v objektu `school` stávající konfigurace `eduvize-kiosk-v1`, včetně sdílených odkazů. Podstránka má ID `school`; tlačítko náhledu ji umí znovu vytvořit. Nevyplněná pole se ve výstupu nezobrazují. Kontakty se zobrazují jako prostý text bez odkazů. Představení je omezené na 240 znaků, motto na 80 a informace pro návštěvníky na 240. Uložený starší text se nemaže. Centrální komponenta `fit-panel.js` přizpůsobuje celý přehled dostupnému oknu.
 
 Kontroly: `node tests/kiosk-apps.test.mjs` a `node tests/school.test.mjs`.
 

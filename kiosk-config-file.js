@@ -14,7 +14,7 @@
       for(const button of page.buttons){if(!button||!['page','url','app','document'].includes(button.type)||typeof button.target!=='string')throw Error('Neplatná akce tlačítka.');text(button.label,'Název tlačítka');}
       if(page.content!==undefined){
         if(!page.content||typeof page.content!=='object'||!Array.isArray(page.content.sections)||page.content.sections.length>100)throw Error('Neplatná struktura obsahu.');
-        text(page.content.intro,'Úvod');for(const section of page.content.sections){if(!section||typeof section!=='object')throw Error('Neplatná obsahová sekce.');text(section.title,'Nadpis sekce');text(section.text,'Text sekce');}
+        text(page.content.intro,'Úvod');text(page.content.image,'Obrázek úvodu');text(page.content.imageAlt,'Popis obrázku');for(const section of page.content.sections){if(!section||typeof section!=='object')throw Error('Neplatná obsahová sekce.');text(section.title,'Nadpis sekce');text(section.text,'Text sekce');for(const key of ['image','imageAlt','link','linkLabel'])text(section[key],'Údaj sekce');}
       }
     }
     if(!ids.has('home'))throw Error('Chybí hlavní nabídka home.');

@@ -6,8 +6,16 @@
 .page-section{padding:16px;background:var(--ev-surface);border:1px solid var(--ev-border);border-radius:var(--ev-card-radius)}
 .page-section h2{margin:0 0 8px;font-size:clamp(17px,1.8vw,24px);color:var(--ev-primary)}
 .page-section p{margin:0;line-height:1.5;white-space:pre-line;overflow-wrap:anywhere;font-size:clamp(14px,1.4vw,18px)}
-body.content-page #tiles{flex:0 0 auto;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));max-height:30%;margin-top:16px;}
-body.content-page #tiles:empty{display:none}
+body.subpage #tiles{display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px;flex:0 0 auto;max-height:none;margin-top:4px;overflow:hidden}
+body.subpage #tiles:empty{display:none}
+body.subpage #tiles .tile{flex:0 1 auto;max-width:min(260px,calc(50% - 4px));min-height:36px;flex-direction:row;gap:7px;padding:7px 11px}
+body.subpage #tiles .tile .app-icon{width:22px;height:22px;padding:3px}
+body.subpage #tiles .tile strong{font-size:13px;line-height:1.2}
+body.subpage #tiles.action-pages{display:flex;flex-direction:column;align-items:stretch;gap:6px}
+.page-action-group{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start}
+.page-section-image{display:block;max-width:100%;width:auto;max-height:clamp(70px,26vh,220px);object-fit:contain;border-radius:var(--ev-card-radius);justify-self:center}
+.page-section-image[hidden]{display:none}
+.page-section-link{margin-top:12px;align-self:flex-start}
 
 .page-content-editor{margin:20px 0}.page-content-editor>.edu-admin__field{margin:14px 0}.page-content-editor .buttonEditor>.edu-admin__field{margin:12px 0}
 

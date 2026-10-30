@@ -13,12 +13,7 @@
 .school-card h3 {font-size:16px;margin:0 0 6px;color:var(--ev-primary)}
 .school-text,.school-contact {font-size:14px;line-height:1.35;white-space:pre-line;overflow-wrap:anywhere;margin:0}
 body.school-open .wrap>#hero {display:none!important}
-body.school-open .wrap>#tiles {flex:0 0 auto;display:flex;flex-wrap:wrap;gap:8px;overflow:auto;max-height:26vh}
-body.school-open .wrap>#tiles .tile {flex:0 1 auto;min-height:44px;padding:8px 18px;flex-direction:row;gap:8px}
-body.school-open .wrap>#tiles .app-icon {width:30px;height:30px;margin:0}
-body.school-open .wrap>#tiles .tile strong {font-size:16px}
 body.school-open.frame-open #schoolContent {display:none}
-body.school-open.frame-open .wrap>#tiles {display:none!important}
 .school-editor-wide {grid-column:1/-1}
 .school-editor-grid textarea {width:100%}
 @media(max-width:480px){.school-cards{grid-template-columns:minmax(0,1fr)}.school-card-wide{grid-column:auto}}

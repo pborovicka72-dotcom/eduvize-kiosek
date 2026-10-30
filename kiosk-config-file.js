@@ -1,6 +1,6 @@
 /* Portable kiosk data only: upload credentials are never part of this schema. */
 (function(root){
-  const keys=['showLogo','tileColumns','tileRows','showInfoPanel','title','subtitle','idleSeconds','pages','school','menuLayout','menuPosition','defaultApp','keyboardMode','layoutOrientation','layoutStyle','layoutBlock','outputType'];
+  const keys=['tileCount','logoUrl','showLogo','tileColumns','tileRows','showInfoPanel','title','subtitle','idleSeconds','pages','school','menuLayout','menuPosition','defaultApp','keyboardMode','layoutOrientation','layoutStyle','layoutBlock','outputType'];
   function validate(data){
     if(!data||typeof data!=='object'||Array.isArray(data))throw Error('Soubor neobsahuje konfiguraci kiosku.');
     if(!Array.isArray(data.pages)||!data.pages.length||data.pages.length>200)throw Error('Chybí platný seznam podstránek.');
@@ -20,7 +20,9 @@
     if(!ids.has('home'))throw Error('Chybí hlavní nabídka home.');
     for(const key of ['title','subtitle','menuPosition','defaultApp','keyboardMode','layoutOrientation','outputType'])text(data[key],key);
     if(data.idleSeconds!==undefined&&(!Number.isFinite(data.idleSeconds)||data.idleSeconds<0))throw Error('Neplatný čas návratu.');
+    if(data.logoUrl!==undefined&&(typeof data.logoUrl!=='string'||(data.logoUrl&&!/^https?:\/\//i.test(data.logoUrl))))throw Error('Logo musí být HTTP(S) URL.');
     if(data.showLogo!==undefined&&typeof data.showLogo!=='boolean')throw Error('Zobrazení loga musí být zapnuté nebo vypnuté.');
+    if(data.tileCount!==undefined&&(!Number.isInteger(data.tileCount)||data.tileCount<3||data.tileCount>25))throw Error('Počet dlaždic musí být 3 až 25.');
     for(const key of ['tileColumns','tileRows'])if(data[key]!==undefined&&(!Number.isInteger(data[key])||data[key]<1||data[key]>8))throw Error('Počet řad a sloupců musí být 1 až 8.');
     if(data.showInfoPanel!==undefined&&typeof data.showInfoPanel!=='boolean')throw Error('Zobrazení panelu musí být zapnuté nebo vypnuté.');
     if(data.school!==undefined){if(!data.school||typeof data.school!=='object'||Array.isArray(data.school))throw Error('Neplatné údaje školy.');for(const value of Object.values(data.school))if(typeof value!=='string')throw Error('Údaje školy musí být text.');}

@@ -18,14 +18,14 @@
     const button=node('button','edu-admin__button','Nahrát a přiřadit dokument');button.type='submit';
     const progress=node('div');progress.hidden=true;progress.setAttribute('aria-live','polite');const bar=node('progress');bar.max=100;bar.value=0;const message=node('div');progress.append(bar,message);form.append(fields,button,progress);panel.append(form);host.append(panel);
     const assign=result=>{item.target=viewer(result.id);if(!item.label||item.label==='Nové tlačítko')item.label=result.name;onChange();};
-    root.EduvizeDocumentUpload.bind({form,file,category,button,progress,bar,message,getToken:()=>token,endpoint:base+'/api/admin/documents',onSuccess:assign});
+    root.EduvizeDocumentUpload.bind({form,file,category,button,progress,bar,message,getToken:()=>token,endpoint:base+'/api/admin/documents',scope:'kiosk',onSuccess:assign});
     load.onclick=async()=>{
       load.disabled=true;progress.hidden=false;message.textContent='Načítám dokumenty…';
       try{
-        const response=await fetch(base+'/api/documents',{cache:'no-store'});const data=await response.json();if(!response.ok)throw Error(data.detail||'Chyba serveru '+response.status);
+        const response=await fetch(base+'/api/documents?scope=kiosk',{cache:'no-store'});const data=await response.json();if(!response.ok)throw Error(data.detail||'Chyba serveru '+response.status);
         select.replaceChildren(new Option('Vyberte dokument…',''));
         for(const doc of data.items||[])select.append(new Option(doc.name,doc.id));
-        if(token){const response=await fetch(base+'/api/admin/categories',{headers:{Authorization:'Bearer '+token}});const data=await response.json();if(!response.ok)throw Error(data.detail||'Nelze načíst kategorie');category.replaceChildren();for(const name of data.categories||[])category.append(new Option(name,name));}
+        if(token){const response=await fetch(base+'/api/admin/categories?scope=kiosk',{headers:{Authorization:'Bearer '+token}});const data=await response.json();if(!response.ok)throw Error(data.detail||'Nelze načíst kategorie');category.replaceChildren();for(const name of data.categories||[])category.append(new Option(name,name));}
         message.textContent='Vyberte dokument, nebo nahrajte nový soubor.';
       }catch(error){message.textContent=error.message+' Připojení OneDrive lze spravovat v administraci Dokumentů.';}
       finally{load.disabled=false;}

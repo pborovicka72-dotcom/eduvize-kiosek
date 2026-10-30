@@ -43,3 +43,5 @@ Celoplošná nabídka rozděluje skutečně zobrazené dlaždice do vyváženýc
 Pro odkaz na obrázek bez přípony slouží akce `image` (Obrázek URL). Běžné přípony a obrazové adresy se rozpoznají automaticky. Přímé obrazové odkazy otevírá sdílený `design-system/image-viewer.html`; stejnou komponentu `mountImage` z `document-viewport.js` používají Dokumenty. Ovládání nabízí celý obrázek, šířku, zoom, posouvání a celou obrazovku. Přehled PDF volí 1–3 strany podle zaplněné plochy.
 
 Otevírání tlačítek i podrobností sekcí používá stejný `resolveForOpen`. U neznámých URL bez přípony se ověří, zda jde o obrázek; načítání chrání identifikátor požadavku, aby pomalý starší odkaz nepřepsal novější výběr. Zobrazení média nepřebírá procentní zoom webového iframe.
+
+Horní náhled je zdrojem aktuálního pohledu pro náhled segmentu. Při změně segmentu se kopíruje podstránka, otevřený obsah a stránka menu; výběr podstránky v editoru nepřepíše ruční navigaci v horním náhledu.

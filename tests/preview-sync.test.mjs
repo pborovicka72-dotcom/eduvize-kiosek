@@ -1,0 +1,12 @@
+import fs from 'node:fs';
+import vm from 'node:vm';
+import assert from 'node:assert/strict';
+const html=fs.readFileSync(new URL('../config.html',import.meta.url),'utf8');
+const start=html.indexOf('function syncPreviewFrame(target)'),end=html.indexOf("window.addEventListener('message',e=>",start),source=html.slice(start,end);
+const sent=[],live={contentWindow:{postMessage:m=>sent.push(['live',m])}},segment={contentWindow:{postMessage:m=>sent.push(['segment',m])}};
+const controls={liveKioskPreview:live,title:{value:'Kiosk'},subtitle:{value:'School'},showInfoPanel:{checked:true},tileCount:{value:'10'},menuPosition:{value:'left'},menuLayout:{value:'menu'},defaultApp:{value:'weather'}};
+const context={c:{pages:[{id:'home'},{id:'school'}]},current:'school',livePreviewView:{page:'home',inFrame:true,frameUrl:'https://example.org/app'},kioskSegmentHost:{querySelector:()=>segment},$:id=>controls[id],normalizeKioskConfig:x=>x,structuredClone,location:{origin:'https://example.org'},window:{EduvizeTileNavigation:{area:()=>({capacity:10})}}};
+vm.runInNewContext(source,context);context.syncPreviewFrame(segment);
+assert.equal(sent.length,1);assert.equal(sent[0][0],'segment');assert.equal(sent[0][1].config.previewView.page,'home');assert.equal(sent[0][1].config.previewView.frameUrl,'https://example.org/app');
+context.syncPreviewFrame(live);assert.equal(sent[1][0],'live');assert.equal(sent[1][1].config.previewView,undefined);
+console.log('Loading a segment copies the live view without resetting the primary preview to the edited school page.');

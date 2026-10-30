@@ -29,3 +29,9 @@ Obrázky sekcí mají vlastní ohraničený box vlevo vedle textu a vyplňují h
 Sdílené `EduvizePagedPanel.mountFlow` seskupuje celé obsahové sekce podle skutečné výšky a přepočítává stránky při změně velikosti okna a načtení obrázku. Stránkování se objeví pouze při nedostatku prostoru. Jedna nadměrně dlouhá sekce využije stávající přizpůsobení velikosti.
 
 Přepínač `showInfoPanel` zobrazí nad aplikací logo Eduvize, místní datum a čas přes sdílenou komponentu `status-panel`. Ve výchozím stavu je vypnutý: v bočním rozložení pak aplikace vyplní i prostor od horní hrany vedle názvu nabídky. Preference se přenáší v JSON i OneDrive konfiguraci. Sdílený Newline picker podporuje volbu `interactivePreview`; Kiosek ji zapíná pro ovládání živého náhledu.
+
+### Sdílené komponenty (v22)
+
+Rozložení kiosku a stránkování vychází z `eduvize-styly/design-system/kiosk-layout.css` a `tile-navigation.js`; lokální kopie jsou odstraněny. Boční nabídka má dvě kolony, horní a spodní nabídka jednu řadu. Při stránkování se zachová stejná kapacita mřížky. Dlaždicové rozložení používá `tileColumns` a `tileRows` (nejméně tři místa kvůli navigaci). Datum a čas jsou vždy viditelné; `showLogo` ovládá jen značku Eduvize. Starší `showInfoPanel` se čte pouze pro převzetí volby loga.
+
+Dokumenty využívají sdílený `document-viewport.js/css` pro skutečné zvětšování, přizpůsobení šířce či výšce, posouvání a fullscreen. Stejné ovládání funguje v samostatných Dokumentech i při otevření z Kiosku. Web školy je volitelný bezpečný HTTP(S) odkaz v informační kartě školy.

@@ -10,6 +10,7 @@
     ['address', 'Adresa', 'textarea'],
     ['phone', 'Telefon', 'tel'],
     ['email', 'E-mail', 'email'],
+    ['website', 'Web školy (URL)', 'url'],
     ['director', 'Ředitel / ředitelka', 'textarea'],
     ['officeHours', 'Úřední hodiny', 'textarea'],
     ['ico', 'IČO', 'text'],
@@ -32,7 +33,7 @@
     if (text !== undefined) element.textContent = text;
     return element;
   }
-  function render(host, config) {
+  function render(host, config, onOpen) {
     const data = values(config);
     for(const [key,limit] of Object.entries(limits))data[key]=shorten(data[key],limit);
     host.replaceChildren();
@@ -61,12 +62,13 @@
       return section;
     }
     card('O škole', data.description, true);
-    if (data.address || data.phone || data.email) {
+    if (data.address || data.phone || data.email || webUrl(data.website)) {
       const contact = node('section', 'school-card');
       contact.append(node('h3', '', 'Adresa a kontakt'));
       if(data.address) contact.append(node('p', 'school-text school-address', data.address));
       if(data.phone)contact.append(node('p','school-contact',data.phone));
       if(data.email)contact.append(node('p','school-contact',data.email));
+      const website=webUrl(data.website);if(website){const link=node('a','edu-navigation-button','Web školy ↗');link.href=website;link.onclick=event=>{if(onOpen){event.preventDefault();onOpen(website);}};contact.append(link);}
       grid.append(contact);
     }
     if (data.director || data.officeHours || data.ico) {

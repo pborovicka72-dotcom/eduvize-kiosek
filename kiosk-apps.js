@@ -40,7 +40,7 @@
     return config;
   }
   function resolve(item, base) {
-    if(item.type==='document'){const url=new URL(item.target,base);if(url.hostname==='eduvize-dokumenty-api.onrender.com'&&url.searchParams.has('document'))url.searchParams.set('eduvize_ui_version','20261030-21');if(!['https:','http:'].includes(url.protocol))return null;return url;}
+    if(item.type==='document'){const url=new URL(item.target,base);if(url.hostname==='eduvize-dokumenty-api.onrender.com'&&url.searchParams.has('document'))url.searchParams.set('eduvize_ui_version','20261030-22');if(!['https:','http:'].includes(url.protocol))return null;return url;}
     const app = item.type === 'app' ? item.target : identify(item.target);
     if (item.type === 'app' && !urls[app]) return null;
     const supplied = item.type === 'app' ? item.appUrl : item.target;

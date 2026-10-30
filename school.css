@@ -22,8 +22,6 @@ body.school-open.frame-open #schoolContent {display:none}
 
 .school-sheet{padding:0 2px 2px;box-sizing:border-box}
 .school-field-counter{color:var(--ev-muted);font-size:12px;font-weight:400}
-body.school-open .kiosk-nav{min-height:30px;padding:4px 10px;font-size:12px;gap:4px}
-body.school-open .kiosk-nav span{font-size:15px;width:17px}
 
 .school-detail + .school-detail{margin-top:6px}
 

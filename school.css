@@ -12,7 +12,6 @@
 .school-card-wide {grid-column:1/-1}
 .school-card h3 {font-size:16px;margin:0 0 6px;color:var(--ev-primary)}
 .school-text,.school-contact {font-size:14px;line-height:1.35;white-space:pre-line;overflow-wrap:anywhere;margin:0}
-.school-contact a {display:inline-block;min-height:30px;padding:3px 0;text-underline-offset:4px}
 body.school-open .wrap>#hero {display:none!important}
 body.school-open .wrap>#tiles {flex:0 0 auto;display:flex;flex-wrap:wrap;gap:8px;overflow:auto;max-height:26vh}
 body.school-open .wrap>#tiles .tile {flex:0 1 auto;min-height:44px;padding:8px 18px;flex-direction:row;gap:8px}
@@ -25,12 +24,10 @@ body.school-open.frame-open .wrap>#tiles {display:none!important}
 @media(max-width:480px){.school-cards{grid-template-columns:minmax(0,1fr)}.school-card-wide{grid-column:auto}}
 
 .school-address{margin-bottom:8px}
-.school-facts{display:grid;gap:8px;margin:0}
-.school-fact{display:grid;grid-template-columns:minmax(90px,.8fr) minmax(0,1.2fr);gap:8px;align-items:start}
-.school-fact dt{font-size:clamp(12px,1.15vw,15px);color:var(--ev-muted);line-height:1.35}
-.school-fact dd{margin:0}
 
 .school-sheet{padding:0 2px 2px;box-sizing:border-box}
 .school-field-counter{color:var(--ev-muted);font-size:12px;font-weight:400}
 body.school-open .kiosk-nav{min-height:30px;padding:4px 10px;font-size:12px;gap:4px}
 body.school-open .kiosk-nav span{font-size:15px;width:17px}
+
+.school-detail + .school-detail{margin-top:6px}

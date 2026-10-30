@@ -27,6 +27,7 @@
   }
   function normalize(config) {
     if (!config || !Array.isArray(config.pages)) return config;
+    for(const page of config.pages) if(page.id==='school') page.buttons=(page.buttons||[]).filter(item=>!(item.type==='page'&&item.target==='home'&&/^zpět$/i.test((item.label||'').trim())));
     for (const page of config.pages) for (const item of page.buttons || []) {
       if (item.type !== 'url') continue;
       const app = identify(item.target);

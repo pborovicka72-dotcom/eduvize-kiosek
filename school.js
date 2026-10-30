@@ -72,14 +72,11 @@
     if (data.director || data.officeHours || data.ico) {
       const details = node('section', 'school-card');
       details.append(node('h3', '', 'Vedení a provoz'));
-      const facts = node('dl', 'school-facts');
       for(const [label,value] of [['Ředitel / ředitelka',data.director],['Úřední hodiny',data.officeHours],['IČO',data.ico]]) {
         if(!value) continue;
-        const row=node('div','school-fact');
-        row.append(node('dt','',label),node('dd','school-text',value));
-        facts.append(row);
+        details.append(node('p','school-text school-detail',label + ': ' + value));
       }
-      details.append(facts);grid.append(details);
+      grid.append(details);
     }
     card('Pro návštěvníky', data.additionalInfo, true);
     if (!grid.children.length && !data.name && !data.motto && !photo) {

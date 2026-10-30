@@ -53,3 +53,6 @@ assert.equal(apps.resolve(picture).searchParams.get('src'),'https://example.org/
 assert.equal(apps.resolve({type:'image',target:'https://example.org/image?id=1'}).searchParams.get('src'),'https://example.org/image?id=1');
 assert.equal(apps.resolve({type:'image',target:'javascript:alert(1)'}),null);
 assert.equal(apps.resolve({type:'url',target:'https://eduvize-dokumenty-api.onrender.com/api/documents/example/file'}).searchParams.get('document'),'example');
+
+const previousImage={type:'app',target:'documents',appUrl:'https://eduvize-dokumenty-api.onrender.com/api/documents/picture/file'};
+apps.normalize({pages:[{buttons:[previousImage]}]});assert.equal(previousImage.type,'document');assert.equal(apps.resolve(previousImage).searchParams.get('document'),'picture');

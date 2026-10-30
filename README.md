@@ -41,3 +41,5 @@ Kresby ikon aplikací načítají administrace i výstup z centrálního `design
 Celoplošná nabídka rozděluje skutečně zobrazené dlaždice do vyvážených řad. Každá řada vyplní celou šířku, řady celou výšku, bez prázdných buněk. Výška stavové lišty se odvozuje samostatně od rozměru výstupu.
 
 Pro odkaz na obrázek bez přípony slouží akce `image` (Obrázek URL). Běžné přípony a obrazové adresy se rozpoznají automaticky. Přímé obrazové odkazy otevírá sdílený `design-system/image-viewer.html`; stejnou komponentu `mountImage` z `document-viewport.js` používají Dokumenty. Ovládání nabízí celý obrázek, šířku, zoom, posouvání a celou obrazovku. Přehled PDF volí 1–3 strany podle zaplněné plochy.
+
+Otevírání tlačítek i podrobností sekcí používá stejný `resolveForOpen`. U neznámých URL bez přípony se ověří, zda jde o obrázek; načítání chrání identifikátor požadavku, aby pomalý starší odkaz nepřepsal novější výběr. Zobrazení média nepřebírá procentní zoom webového iframe.

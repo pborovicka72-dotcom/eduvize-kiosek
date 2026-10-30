@@ -3,7 +3,7 @@
   const limits={intro:400,title:100,text:1600};
   function node(tag,className,text){const e=document.createElement(tag);e.className=className||'';if(text!==undefined)e.textContent=text;return e;}
   function safeUrl(value){try{const u=new URL(value);return ['https:','http:'].includes(u.protocol)?u.href:null;}catch{return null;}}
-  function image(parent,url,alt){const src=safeUrl(url);if(!src)return;const img=node('img','page-section-image');img.alt=alt||'';img.hidden=true;img.onload=()=>{img.hidden=false;root.EduvizeFitPanel?.refresh();};img.onerror=()=>{img.remove();root.EduvizeFitPanel?.refresh();};img.src=src;parent.append(img);}
+  function image(parent,url,alt){const src=safeUrl(url);if(!src)return;const box=node('figure','page-image-box'),img=node('img','page-section-image');img.alt=alt||'';box.hidden=true;img.onload=()=>{box.hidden=false;root.EduvizeFitPanel?.refresh();};img.onerror=()=>{box.hidden=true;root.EduvizeFitPanel?.refresh();};box.append(img);parent.append(box);img.src=src;}
   function render(host,page,onOpen){
     const content=page.content||{};
     const sections=(content.sections||[]).filter(section=>section.title||section.text||safeUrl(section.image)||safeUrl(section.link));
@@ -12,15 +12,16 @@
     if(!hasContent){host.replaceChildren();return false;}
     root.EduvizePagedPanel.mount(host,segments,{key:page.id,label:'Stránkování podstránky',render:(sheet,section,index)=>{
       sheet.className='edu-paged-content page-content-sheet';
-      if(index===0){image(sheet,content.image,content.imageAlt||'');if(content.intro)sheet.append(node('p','page-intro edu-content-intro',String(content.intro)));}
+      if(index===0&&(content.intro||safeUrl(content.image))){const row=node('div','page-content-row');image(row,content.image,page.title);if(content.intro)row.append(node('p','page-intro edu-content-intro',String(content.intro)));sheet.append(row);}
       if(!section)return;
-      image(sheet,section.image,section.imageAlt||section.title||'');
+      const row=node('div','page-content-row');
+      image(row,section.image,section.title||page.title);
       const card=node('section','page-section');
       if(section.title)card.append(node('h2','',String(section.title)));
       if(section.text)card.append(node('p','',String(section.text)));
       const link=safeUrl(section.link);
-      if(link){const button=node('button','edu-pagination-button page-section-link',section.linkLabel||'Otevřít související informace');button.type='button';button.onclick=()=>onOpen?.(link);card.append(button);}
-      if(card.children.length)sheet.append(card);
+      if(link){const button=node('button','page-section-link','📎');button.type='button';button.title='Otevřít podrobnosti';button.setAttribute('aria-label','Otevřít podrobnosti'+(section.title?' – '+section.title:''));button.onclick=()=>onOpen?.(link);card.append(button);}
+      if(card.children.length)row.append(card);sheet.append(row);
     }});
     return true;
   }
@@ -38,17 +39,14 @@
       input.oninput=()=>{change(input.value);onChange();};wrap.append(input);parent.append(wrap);
     }
     field(host,'Obrázek úvodu (URL)',content.image,2048,value=>content.image=value,false);
-    field(host,'Popis obrázku úvodu',content.imageAlt,160,value=>content.imageAlt=value,false);
     field(host,'Úvodní text',content.intro,limits.intro,value=>content.intro=value,true);
     content.sections.forEach((section,index)=>{
       const card=node('div','buttonEditor');
       card.append(node('h3','','Sekce '+(index+1)));
       field(card,'Obrázek sekce (URL)',section.image,2048,value=>section.image=value,false);
-      field(card,'Popis obrázku sekce',section.imageAlt,160,value=>section.imageAlt=value,false);
       field(card,'Nadpis sekce',section.title,limits.title,value=>section.title=value,false);
       field(card,'Text sekce',section.text,limits.text,value=>section.text=value,true);
       field(card,'Odkaz sekce (URL)',section.link,2048,value=>section.link=value,false);
-      field(card,'Název tlačítka odkazu',section.linkLabel,100,value=>section.linkLabel=value,false);
       const actions=node('div','edu-admin__actions');
       for(const [label,offset] of [['Nahoru',-1],['Dolů',1],['Odebrat sekci',0]]){
         const button=node('button','edu-admin__button edu-admin__button--secondary',label);button.type='button';

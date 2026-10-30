@@ -17,3 +17,9 @@ Kontroly: `node tests/kiosk-apps.test.mjs` a `node tests/school.test.mjs`.
 Vzhled administrace, aktivní styl, výběr šablon Newline a geometrie segmentů pocházejí z `eduvize-styly`. Lokální CSS smí definovat pouze rozložení a specifické prvky Kiosku, nikoliv další kopii centrálního design systému.
 
 Změny administrace nesmějí neúmyslně ovlivnit zobrazení samotného Kiosku.
+
+### Konfigurace na OneDrive
+
+Administrace ukládá a načítá pojmenované konfigurace přes existující službu Dokumenty, se stejným administračním klíčem a připojením Microsoftu. Soubory jsou v `Eduvize-Dokumenty/_Eduvize-system/Kiosek/<název>.json`; nejsou součástí veřejného katalogu dokumentů. Před přepsáním se uloží `<název>.previous.json`. Klíč je pouze v paměti stránky, nikdy v konfiguraci, URL ani localStorage. Čtení i zápis vyžadují autorizaci. JSON stažení zůstává doplňkovou zálohou.
+
+Obrázky úvodu a sekcí mají vlastní ohraničený box vlevo vedle textu. Nedostupné obrázky se skryjí. Popisy obrázků a názvy odkazů se již nezadávají; přístupný název obrázku vychází z nadpisu a odkaz na podrobnosti má podobu malé sponky.

@@ -31,5 +31,5 @@
       finally{load.disabled=false;}
     };
   }
-  root.EduvizeKioskDocuments=Object.freeze({editor,viewer});
+  root.EduvizeKioskDocuments=Object.freeze({editor,viewer,getToken:()=>token,setToken:value=>{token=String(value||'');}});
 })(window);

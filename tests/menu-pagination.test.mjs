@@ -21,7 +21,7 @@ assert.equal(page(many,0,12).slots,12);assert.equal(page(many,0,12).items.length
 assert.equal(context.window.EduvizeTileNavigation.grid(3,4).capacity,12);
 
 const {layout}=context.window.EduvizeTileNavigation;
-for(const [position,portrait,columns,rows,capacity] of [['left',false,2,5,10],['right',false,2,5,10],['top',false,7,1,7],['bottom',false,7,1,7],['left',true,3,3,9],['right',true,3,3,9],['top',true,5,2,10],['bottom',true,5,2,10]]){
+for(const [position,portrait,columns,rows,capacity] of [['left',false,2,5,10],['right',false,2,5,10],['top',false,7,1,7],['bottom',false,7,1,7],['left',true,1,9,9],['right',true,1,9,9],['top',true,5,2,10],['bottom',true,5,2,10]]){
  const setup=layout(position,portrait);assert.equal(setup.columns,columns);assert.equal(setup.rows,rows);assert.equal(setup.capacity,capacity);
  assert.equal(page(Array(capacity).fill(0),0,capacity).next,null);
  assert.equal(page(Array(capacity+1).fill(0),0,capacity).next,1);
@@ -50,3 +50,12 @@ for(const total of [3,7,10,17,25])for(const [width,height] of [[1200,500],[500,1
  assert.ok(fitted.columns*(fitted.rows-1)<total);
 }
 console.log('Area grids adapt to the available aspect ratio without shrinking the grid.');
+
+for(const total of [1,2,7,10,11,17,25])for(const [w,h] of [[1200,600],[400,700]]){
+ const packed=context.window.EduvizeTileNavigation.pack(total,w,h,8);
+ assert.equal(packed.counts.reduce((a,b)=>a+b,0),total);
+ assert.equal(packed.rows,packed.counts.length);
+ assert.ok(Math.max(...packed.counts)-Math.min(...packed.counts)<=1);
+ assert.ok(packed.counts.every(n=>n>0));
+}
+console.log('Balanced rows contain every visible tile, without empty cells.');

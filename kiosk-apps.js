@@ -8,7 +8,7 @@
     transport: 'https://pborovicka72-dotcom.github.io/eduvize-jizdni-rady/index.html',
     wisdom: 'https://pborovicka72-dotcom.github.io/eduvize-moudrost-dne/index.html',
     documents: 'https://eduvize-dokumenty-api.onrender.com/display',
-    news: 'https://eduvize-aktuality.onrender.com/?display=1'
+    news: 'https://eduvize-aktuality.onrender.com/?display=1&v=20261031-news-source-58'
   });
   const paths = {holidays: 'eduvize-svatky', transport: 'eduvize-jizdni-rady',
     wisdom: 'eduvize-moudrost-dne', documents: 'eduvize-dokumenty', news: 'eduvize-aktuality'};

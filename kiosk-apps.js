@@ -79,10 +79,14 @@
     imageChecks.set(url,result);result.then(found=>{if(!found)imageChecks.delete(url);});return result;
   }
   function isImageViewer(value){try{const u=new URL(value);return u.origin==='https://pborovicka72-dotcom.github.io'&&u.pathname==='/eduvize-styly/design-system/image-viewer.html';}catch{return false;}}
+  function resolveForOutput(item,base){
+    const url=resolve(item,base);
+    return url&&root.EduvizeOutputModes&&(item.type==='document'||identify(url.href))?root.EduvizeOutputModes.url(url,'kiosk'):url;
+  }
   async function resolveForOpen(item,base){
-    let url=resolve(item,base);if(!url)return null;if(item.type==='document'||identify(url.href))url=root.EduvizeOutputModes.url(url,'kiosk');
+    const url=resolveForOutput(item,base);if(!url)return null;
     if(item.type!=='url'||identify(item.target)||isImageViewer(url.href))return url;
     return await probeImage(url.href)?imageViewer(url.href,base):url;
   }
-  root.EduvizeKioskApps = Object.freeze({urls, identify, normalize, resolve, resolveForOpen, isImageViewer, imageSource, version});
+  root.EduvizeKioskApps = Object.freeze({urls, identify, normalize, resolve:resolveForOutput, resolveForOpen, isImageViewer, imageSource, version});
 })(window);

@@ -76,7 +76,7 @@
       details.append(node('h3', '', 'Vedení a provoz'));
       for(const [label,value] of [['Ředitel / ředitelka',data.director],['Úřední hodiny',data.officeHours],['IČO',data.ico]]) {
         if(!value) continue;
-        const entry=node('div','school-detail');entry.append(node('div','school-detail-label',label),node('p','school-text',value));details.append(entry);
+        if(label==='IČO'){details.append(node('p','school-text school-detail','IČO: '+value));continue;}const entry=node('div','school-detail');entry.append(node('div','school-detail-label',label),node('p','school-text',value));details.append(entry);
       }
       grid.append(details);
     }

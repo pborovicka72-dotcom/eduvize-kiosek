@@ -10,14 +10,14 @@
     const auth=node('label','edu-admin__field','Administrační klíč Dokumentů');const password=node('input');password.type='password';password.autocomplete='off';password.value=token;password.oninput=()=>token=password.value;auth.append(password);panel.append(auth);
     const load=node('button','edu-admin__button edu-admin__button--secondary','Načíst dokumenty a kategorie');load.type='button';const loadStatus=node('p','edu-upload-status');loadStatus.setAttribute('role','status');loadStatus.setAttribute('aria-live','polite');panel.append(load,loadStatus);
     const label=node('label','edu-admin__field','Existující dokument');const select=node('select');select.append(new Option('Vyberte dokument…',''));label.append(select);panel.append(label);
-    select.onchange=()=>{if(!select.value)return;item.target=viewer(select.value);if(!item.label||item.label==='Nové tlačítko')item.label=select.selectedOptions[0].textContent;onChange();};
+    select.onchange=()=>{if(!select.value)return;item.target=viewer(select.value);item.label=select.selectedOptions[0].textContent;onChange();};
     const form=node('form','edu-document-upload');
     const fields=node('div','edu-admin__field-grid');
     const fileLabel=node('label','','Soubor (nejvýše 20 MB)');const file=node('input');file.type='file';file.required=true;fileLabel.append(file);
     const categoryLabel=node('label','','Kategorie');const category=node('select');category.append(new Option('Ostatní','Ostatní'));categoryLabel.append(category);fields.append(fileLabel,categoryLabel);
     const button=node('button','edu-admin__button','Nahrát a přiřadit dokument');button.type='submit';
     const progress=node('div');progress.hidden=true;progress.setAttribute('aria-live','polite');const bar=node('progress');bar.max=100;bar.value=0;const message=node('div');progress.append(bar,message);form.append(fields,button,progress);panel.append(form);host.append(panel);
-    const assign=result=>{item.target=viewer(result.id);if(!item.label||item.label==='Nové tlačítko')item.label=result.name;onChange();};
+    const assign=result=>{item.target=viewer(result.id);item.label=result.name;onChange();};
     root.EduvizeDocumentUpload.bind({form,file,category,button,progress,bar,message,getToken:()=>token,endpoint:base+'/api/admin/documents',scope:'kiosk',onSuccess:assign});
     load.onclick=async()=>{
       if(load.disabled)return;load.disabled=true;select.disabled=true;category.disabled=true;load.textContent='Načítám…';panel.setAttribute('aria-busy','true');loadStatus.textContent='Načítám dokumenty a kategorie z OneDrive…';

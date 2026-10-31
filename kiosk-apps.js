@@ -86,7 +86,7 @@
   async function resolveForOpen(item,base){
     const url=resolveForOutput(item,base);if(!url)return null;
     if(item.type!=='url'||identify(item.target)||isImageViewer(url.href))return url;
-    return await probeImage(url.href)?imageViewer(url.href,base):url;
+    const result=await probeImage(url.href)?imageViewer(url.href,base):url;return isImageViewer(result.href)&&root.EduvizeOutputModes?.mode()==='web'?root.EduvizeOutputModes.url(result,'web'):result;
   }
   root.EduvizeKioskApps = Object.freeze({urls, identify, normalize, resolve:resolveForOutput, resolveForOpen, isImageViewer, imageSource, version});
 })(window);

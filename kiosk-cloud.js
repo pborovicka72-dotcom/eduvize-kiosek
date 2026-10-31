@@ -14,6 +14,7 @@
     save:(value,config,token)=>request('PUT','/'+name(value),token,root.EduvizeKioskConfigFile.stringify(config)),
     load:async(value,token)=>root.EduvizeKioskConfigFile.parse(JSON.stringify(await request('GET','/'+name(value),token)))
   };
+  let refreshList=async()=>{};
   function mount(host,{getConfig,onLoad,onSaved}){
     function node(tag,cls,text){const e=document.createElement(tag);e.className=cls||'';if(text)e.textContent=text;return e;}
     function field(label,input){const wrap=node('label','edu-admin__field',label);wrap.append(input);return wrap;}
@@ -26,9 +27,11 @@
     const buttons=[];
     function action(label,run,primary=false){const button=node('button','edu-admin__button'+(primary?'':' edu-admin__button--secondary'),label);button.type='button';buttons.push(button);button.onclick=async()=>{buttons.forEach(b=>b.disabled=true);status.textContent='Pracuji s OneDrive…';try{await run(root.EduvizeKioskDocuments.getToken());}catch(error){status.textContent=error.message;}finally{buttons.forEach(b=>b.disabled=false);}};actions.append(button);}
     action('Uložit na OneDrive',async token=>{await client.save(filename.value.trim(),getConfig(),token);onSaved?.();status.textContent='Konfigurace uložena na OneDrive do Eduvize-Dokumenty / _Eduvize-system / Kiosek. Při přepsání se zachovává i předchozí verze.';},true);
-    action('Načíst z OneDrive',async token=>{const data=await client.load(filename.value.trim(),token);onLoad(data);status.textContent='Konfigurace načtena z OneDrive a uložena v tomto prohlížeči. Předchozí nastavení lze vrátit tlačítkem níže.';});
-    action('Načíst seznam',async token=>{const data=await client.list(token);stored.replaceChildren(new Option('Vyberte konfiguraci…',''));for(const item of data.items)stored.append(new Option(item.name,item.name));status.textContent=data.items.length?'Vyberte konfiguraci a klikněte na Načíst z OneDrive.':'Na OneDrive zatím není uložená konfigurace kiosku.';});
+    action('Načíst z OneDrive',async token=>{const data=await client.load(filename.value.trim(),token);onLoad(data);await root.EduvizeKioskDocuments.refresh();status.textContent='Konfigurace načtena z OneDrive a uložena v tomto prohlížeči. Předchozí nastavení lze vrátit tlačítkem níže.';});
+    refreshList=async()=>{try{const previous=stored.value;const data=await client.list(root.EduvizeKioskDocuments.getToken());stored.replaceChildren(new Option('Vyberte konfiguraci…',''));for(const item of data.items)stored.append(new Option(item.name,item.name));if([...stored.options].some(o=>o.value===previous))stored.value=previous;status.textContent=data.items.length?'Seznam konfigurací obnoven. Vyberte konfiguraci a klikněte na Načíst z OneDrive.':'Na OneDrive zatím není uložená konfigurace kiosku.';return data;}catch(e){status.textContent='Konfigurace: '+e.message;throw e;}};
+    action('Načíst seznam',async()=>{await root.EduvizeKioskDocuments.refresh();});
+
     host.append(actions,status);
   }
-  root.EduvizeKioskCloud=Object.freeze({client,mount});
+  root.EduvizeKioskCloud=Object.freeze({client,mount,refreshList:()=>refreshList()});
 })(window);

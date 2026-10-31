@@ -3,7 +3,7 @@
   const limits={title:100,text:1600};const openSections=new WeakSet();
   function node(tag,className,text){const e=document.createElement(tag);e.className=className||'';if(text!==undefined)e.textContent=text;return e;}
   function safeUrl(value){try{const u=new URL(value);return ['https:','http:'].includes(u.protocol)?u.href:null;}catch{return null;}}
-  function image(parent,url,alt){const src=safeUrl(url);if(!src)return;const box=node('figure','page-image-box'),img=node('img','page-section-image');img.alt=alt||'';box.hidden=false;img.onload=()=>{box.hidden=false;root.EduvizeFitPanel?.refresh();};img.onerror=()=>{box.hidden=true;root.EduvizeFitPanel?.refresh();};box.append(img);parent.append(box);img.src=src;}
+  function image(parent,url,alt,fit){const src=safeUrl(url);if(!src)return;const box=node('figure','page-image-box'),img=node('img','page-section-image');img.alt=alt||'';box.style.setProperty('--page-image-fit',fit==='contain'?'contain':'cover');box.hidden=false;img.onload=()=>{box.hidden=false;root.EduvizeFitPanel?.refresh();};img.onerror=()=>{box.hidden=true;root.EduvizeFitPanel?.refresh();};box.append(img);parent.append(box);img.src=src;}
   function render(host,page,onOpen){
     root.EduvizeContentSurface?.mount(host,{flow:true});const content=page.content||{};
     const sections=(content.sections||[]).filter(section=>section.title||section.text||safeUrl(section.image)||safeUrl(section.link));
@@ -14,7 +14,7 @@
       sheet.className='edu-paged-content page-content-sheet';
       for(const section of items){
       const row=node('div','page-content-row');
-      image(row,section.image,section.title||page.title);
+      image(row,section.image,section.title||page.title,section.imageFit||content.imageFit);
       const card=node('section','page-section');
       if(section.title)card.append(node('h2','',String(section.title)));
       if(section.text)card.append(node('p','',String(section.text)));
@@ -49,6 +49,10 @@
       const body=node('div','edu-item-editor__body'),fields=node('div','edu-item-editor__fields');
       field(fields,'Nadpis sekce',section.title,limits.title,value=>{section.title=value;title.textContent=value||'Sekce '+(index+1)},false);
       field(fields,'Obrázek sekce (URL)',section.image,2048,value=>section.image=value,false);
+      const fitWrap=node('label','edu-admin__field','Zobrazení obrázku'),fitSelect=node('select');
+      for(const [value,label] of [['cover','Oříznout a vyplnit rámeček'],['contain','Celý obrázek s barevným doplněním']]){const option=node('option','',label);option.value=value;fitSelect.append(option);}
+      fitSelect.value=section.imageFit||content.imageFit||'cover';
+      fitSelect.onchange=()=>{section.imageFit=fitSelect.value;onChange();};fitWrap.append(fitSelect);fields.append(fitWrap);
       field(fields,'Odkaz sekce (URL)',section.link,2048,value=>section.link=value,false);
       field(fields,'Text sekce',section.text,limits.text,value=>section.text=value,true);
       fields.lastElementChild?.classList.add('edu-item-editor__wide');

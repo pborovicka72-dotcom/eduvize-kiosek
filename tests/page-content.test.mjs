@@ -28,7 +28,7 @@ assert.equal(host.children[1].hidden,true);
 assert.equal(host.children[0].children[0].children.length,3);
 const sheet=host.children[0].children[0];
 const row=sheet.children[2],box=row.children[0],card=row.children[1];
-assert.equal(box.tagName,'figure');assert.equal(box.hidden,true);
+assert.equal(box.tagName,'figure');assert.equal(box.hidden,false); // Reserve image geometry before load so pagination measures text at the final width.
 assert.equal(box.children[0].tagName,'img');box.children[0].onload();assert.equal(box.hidden,false);
 assert.equal(box.children[0].alt,'Třetí sekce');
 const clip=card.children[2];assert.equal(clip.textContent,'📎');assert.ok(clip['aria-label'].includes('Třetí sekce'));

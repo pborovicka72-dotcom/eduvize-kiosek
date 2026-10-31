@@ -52,7 +52,15 @@
       image.onerror = () => image.remove();
       intro.append(image);
     }
-    sheet.append(intro);
+    const sharedHeader=document.querySelector('.wrap>.edu-content-navigation');
+    if(sharedHeader&&document.body.classList.contains('school-open')){
+      const title=sharedHeader.querySelector('#navigationTitle'),subtitle=sharedHeader.querySelector('#navigationSubtitle');
+      if(data.name)title.textContent=data.name;
+      if(data.motto){subtitle.textContent=data.motto;subtitle.hidden=false;}
+      sharedHeader.querySelectorAll('.school-photo').forEach(image=>image.remove());
+      const headerPhoto=intro.querySelector('.school-photo');if(headerPhoto)sharedHeader.append(headerPhoto);
+      root.EduvizeOutputHeader?.update();
+    }else sheet.append(intro);
     const grid = node('div', 'school-cards');
     function card(title, text, wide) {
       if (!text) return null;

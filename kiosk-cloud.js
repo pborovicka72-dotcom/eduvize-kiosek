@@ -3,8 +3,8 @@
   const base='https://eduvize-dokumenty-api.onrender.com/api/admin/kiosk-configurations';
   function name(value){if(!/^[a-zA-Z0-9_-]{1,64}$/.test(value))throw Error('Použijte 1–64 písmen bez diakritiky, číslic, pomlček nebo podtržítek.');return value;}
   async function request(method,path,token,body){
-    if(!token)throw Error('Zadejte administrační klíč Dokumentů.');
-    const response=await fetch(base+path,{method,cache:'no-store',headers:{Authorization:'Bearer '+token,...(body?{'Content-Type':'application/json'}:{})},...(body?{body}:{})});
+    await root.EduvizeAdminAuth.ready;if(!root.EduvizeAdminAuth.getToken('documents'))throw Error(root.EduvizeAdminAuth.need('documents'));
+    const response=await root.EduvizeAdminAuth.fetch(base+path,{method,headers:body?{'Content-Type':'application/json'}:{},...(body?{body}:{})},'documents');
     const data=await response.json();
     if(!response.ok)throw Error(typeof data.detail==='string'?data.detail:'OneDrive není dostupný ('+response.status+').');
     return data;
@@ -18,7 +18,7 @@
   function mount(host,{getConfig,onLoad,onSaved}){
     function node(tag,cls,text){const e=document.createElement(tag);e.className=cls||'';if(text)e.textContent=text;return e;}
     function field(label,input){const wrap=node('label','edu-admin__field',label);wrap.append(input);return wrap;}
-    host.append(node('h2','','Konfigurace na OneDrive'),node('p','help','Uložte nastavení pod vlastním názvem a načtěte je na jiném zařízení. Používá se OneDrive připojený v Dokumentech. Klíč zůstává pouze v paměti této stránky.'));
+    host.append(node('h2','','Konfigurace na OneDrive'),node('p','help','Uložte nastavení pod vlastním názvem a načtěte je na jiném zařízení. Používá se společné přihlášení a OneDrive připojený na rozcestníku Eduvize.'));
     const grid=node('div','edu-admin__field-grid'),filename=node('input'),stored=node('select');
     filename.value='hlavni-kiosek';filename.maxLength=64;filename.pattern='[a-zA-Z0-9_-]{1,64}';
     stored.append(new Option('Nejprve načtěte seznam…',''));stored.onchange=()=>{if(stored.value)filename.value=stored.value;};

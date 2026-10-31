@@ -5,7 +5,7 @@
   function safeUrl(value){try{const u=new URL(value);return ['https:','http:'].includes(u.protocol)?u.href:null;}catch{return null;}}
   function image(parent,url,alt){const src=safeUrl(url);if(!src)return;const box=node('figure','page-image-box'),img=node('img','page-section-image');img.alt=alt||'';box.hidden=true;img.onload=()=>{box.hidden=false;root.EduvizeFitPanel?.refresh();};img.onerror=()=>{box.hidden=true;root.EduvizeFitPanel?.refresh();};box.append(img);parent.append(box);img.src=src;}
   function render(host,page,onOpen){
-    const content=page.content||{};
+    root.EduvizeContentSurface?.mount(host);const content=page.content||{};
     const sections=(content.sections||[]).filter(section=>section.title||section.text||safeUrl(section.image)||safeUrl(section.link));
     const segments=sections;
     const hasContent=sections.length>0;

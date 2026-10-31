@@ -10,7 +10,7 @@
     const segments=sections;
     const hasContent=sections.length>0;
     if(!hasContent){host.replaceChildren();return false;}
-    root.EduvizePagedPanel.mountFlow(host,segments,{key:page.id,label:'Stránkování podstránky',render:(sheet,items)=>{
+    root.EduvizePagedPanel.mountFlow(host,segments,{key:page.id,fit:false,label:'Stránkování podstránky',render:(sheet,items)=>{
       sheet.className='edu-paged-content page-content-sheet';
       for(const section of items){
       const row=node('div','page-content-row');

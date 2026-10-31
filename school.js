@@ -39,7 +39,7 @@
     host.replaceChildren();
     delete host.dataset.eduFit;root.EduvizeContentSurface?.mount(host,{fit:true});
     const sheet=node('div','school-sheet');
-    const intro = node('section', 'school-intro');
+    const intro = node('section', 'school-intro edu-content-heading');
     const heading = node('div', 'school-intro-copy');
     heading.append(node('h2', '', data.name || 'Naše škola'));
     if (data.motto) heading.append(node('p', 'school-motto', data.motto));

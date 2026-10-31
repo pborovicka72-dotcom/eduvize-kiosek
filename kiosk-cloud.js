@@ -18,11 +18,10 @@
     function node(tag,cls,text){const e=document.createElement(tag);e.className=cls||'';if(text)e.textContent=text;return e;}
     function field(label,input){const wrap=node('label','edu-admin__field',label);wrap.append(input);return wrap;}
     host.append(node('h2','','Konfigurace na OneDrive'),node('p','help','Uložte nastavení pod vlastním názvem a načtěte je na jiném zařízení. Používá se OneDrive připojený v Dokumentech. Klíč zůstává pouze v paměti této stránky.'));
-    const grid=node('div','edu-admin__field-grid'),key=node('input'),filename=node('input'),stored=node('select');
-    key.type='password';key.autocomplete='off';key.value=root.EduvizeKioskDocuments.getToken();key.oninput=()=>root.EduvizeKioskDocuments.setToken(key.value);
+    const grid=node('div','edu-admin__field-grid'),filename=node('input'),stored=node('select');
     filename.value='hlavni-kiosek';filename.maxLength=64;filename.pattern='[a-zA-Z0-9_-]{1,64}';
     stored.append(new Option('Nejprve načtěte seznam…',''));stored.onchange=()=>{if(stored.value)filename.value=stored.value;};
-    grid.append(field('Administrační klíč Dokumentů',key),field('Název konfigurace na OneDrive',filename),field('Uložené konfigurace',stored));host.append(grid);
+    grid.append(field('Název konfigurace na OneDrive',filename),field('Uložené konfigurace',stored));host.append(grid);
     const actions=node('div','edu-admin__actions'),status=node('p','help');status.setAttribute('role','status');
     const buttons=[];
     function action(label,run,primary=false){const button=node('button','edu-admin__button'+(primary?'':' edu-admin__button--secondary'),label);button.type='button';buttons.push(button);button.onclick=async()=>{buttons.forEach(b=>b.disabled=true);status.textContent='Pracuji s OneDrive…';try{await run(root.EduvizeKioskDocuments.getToken());}catch(error){status.textContent=error.message;}finally{buttons.forEach(b=>b.disabled=false);}};actions.append(button);}

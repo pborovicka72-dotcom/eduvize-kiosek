@@ -9,8 +9,7 @@
   function node(tag,className,text){const e=document.createElement(tag);if(className)e.className=className;if(text!==undefined)e.textContent=text;return e;}
   function editor(host,item,onChange){
     const panel=node('div','document-button-editor');
-    panel.append(node('p','help','Vyberte existující dokument nebo nahrajte nový do stejného OneDrive jako v Dokumentech. Klíč je jen v paměti této stránky, nikoli v konfiguraci kiosku.'));
-    const auth=node('label','edu-admin__field','Administrační klíč Dokumentů');const password=node('input');password.type='password';password.autocomplete='off';password.value=token;password.oninput=()=>token=password.value;auth.append(password);panel.append(auth);
+    panel.append(node('p','help','Vyberte existující dokument nebo nahrajte nový do stejného OneDrive jako v Dokumentech. Společný administrační klíč zadejte jednou v horní části stránky.'));
     const load=node('button','edu-admin__button edu-admin__button--secondary','Načíst dokumenty a kategorie');load.type='button';const loadStatus=node('p','edu-upload-status');loadStatus.setAttribute('role','status');loadStatus.setAttribute('aria-live','polite');panel.append(load,loadStatus);
     const label=node('label','edu-admin__field','Existující dokument');const select=node('select');function fillDocuments(){const id=assignedId(item);const options=documents.slice();if(id&&!options.some(doc=>String(doc.id)===id))options.push({id,name:item.label||'Přiřazený dokument'});select.replaceChildren(new Option('Vyberte dokument…',''));for(const doc of options)select.append(new Option(doc.name,String(doc.id)));select.value=id;}fillDocuments();label.append(select);panel.append(label);
     select.onchange=()=>{if(!select.value)return;item.target=viewer(select.value);item.label=select.selectedOptions[0].textContent;onChange();};
@@ -33,5 +32,5 @@
       finally{load.disabled=false;select.disabled=false;category.disabled=false;load.textContent='Načíst dokumenty a kategorie';panel.setAttribute('aria-busy','false');}
     };
   }
-  root.EduvizeKioskDocuments=Object.freeze({editor,viewer,getToken:()=>token,setToken:value=>{token=String(value||'');}});
+  root.EduvizeKioskDocuments=Object.freeze({editor,viewer,getToken:()=>token,setToken:value=>{token=String(value||'').trim();}});
 })(window);

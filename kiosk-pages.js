@@ -21,7 +21,7 @@
     }
   }
   function remove(config,id){
-    if(id==='home')return false;
+    if(id==='home'||id==='school')return false;
     config.pages=config.pages.filter(page=>page.id!==id);
     for(const page of config.pages)page.buttons=(page.buttons||[]).filter(button=>button.type!=='page'||button.target!==id);
     return true;

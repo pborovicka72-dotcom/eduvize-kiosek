@@ -19,5 +19,8 @@ assert.notEqual(child.id,duplicate.id);
 assert.equal(pages.remove(config,child.id),true);
 assert.equal(parent.buttons.length,0);
 assert.equal(pages.remove(config,'home'),false);
+config.pages.push({id:'school',title:'O škole',buttons:[]});
+assert.equal(pages.remove(config,'school'),false);
+assert.ok(config.pages.some(page=>page.id==='school'));
 assert.ok(config.pages.some(page=>page.id==='home'));
 console.log('Page hierarchy passed.');

@@ -5,7 +5,7 @@ const APP_URLS=window.EduvizeKioskApps.urls;let config=getConfig();if(PREVIEW)co
  const url=new URL('index.html',location.href);url.search='';
  const embeddedConfig={...config};delete embeddedConfig.previewView;delete embeddedConfig.previewPage;const bytes=new TextEncoder().encode(JSON.stringify(embeddedConfig));let binary='';for(const byte of bytes)binary+=String.fromCharCode(byte);
  url.searchParams.set('config',btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''));
- url.searchParams.set('embedded_page',id);url.searchParams.set('build','20261031-fill');
+ url.searchParams.set('embedded_page',id);url.searchParams.set('build','20261031-type');
  if($('contentFrame').src!==url.href)$('contentFrame').src=url.href;$('contentFrame').classList.remove('hidden');$('hero').classList.add('hidden');
  inFrame=true;document.body.classList.remove('zoom-frame');document.documentElement.style.setProperty('--embedded-scale','1');document.body.classList.add('frame-open');updateNav();
 }

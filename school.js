@@ -35,7 +35,7 @@
   }
   function render(host, config, onOpen) {
     const data = values(config);
-    for(const [key,limit] of Object.entries(limits))data[key]=shorten(data[key],limit);
+    if(root.EduvizeOutputModes?.mode?.()!=='web')for(const [key,limit] of Object.entries(limits))data[key]=shorten(data[key],limit);
     host.replaceChildren();
     delete host.dataset.eduFit;root.EduvizeContentSurface?.mount(host,{fit:true});
     const sheet=node('div','school-sheet');

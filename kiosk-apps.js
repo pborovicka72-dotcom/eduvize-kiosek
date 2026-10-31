@@ -81,7 +81,7 @@
   function isImageViewer(value){try{const u=new URL(value);return u.origin==='https://pborovicka72-dotcom.github.io'&&u.pathname==='/eduvize-styly/design-system/image-viewer.html';}catch{return false;}}
   function resolveForOutput(item,base){
     const url=resolve(item,base);
-    return url&&root.EduvizeOutputModes&&(item.type==='document'||identify(url.href))?root.EduvizeOutputModes.url(url,'kiosk'):url;
+    return url&&root.EduvizeOutputModes&&(item.type==='document'||identify(url.href))?root.EduvizeOutputModes.url(url,root.EduvizeOutputModes.mode()==='web'?'web':'kiosk'):url;
   }
   async function resolveForOpen(item,base){
     const url=resolveForOutput(item,base);if(!url)return null;

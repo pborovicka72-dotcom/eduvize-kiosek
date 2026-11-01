@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 class Element{
-  constructor(tag){this.tagName=tag;this.children=[];this.dataset={};this.classList={add(){}};}
+  constructor(tag){this.tagName=tag;this.children=[];this.dataset={};this.style={setProperty(){}};this.classList={add(){}};}
   setAttribute(key,value){this[key]=value;}
   append(...children){this.children.push(...children);}
   replaceChildren(...children){this.children=children;}

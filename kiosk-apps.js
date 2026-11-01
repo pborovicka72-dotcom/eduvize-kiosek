@@ -1,8 +1,9 @@
 /* Shared application routing for the kiosk and its configuration previews. */
 (function (root) {
   'use strict';
-  const version = '20261101-header-school-15';
+  const version = '20261101-menu-20';
   const urls = Object.freeze({
+    menu: 'http://127.0.0.1:8790/index.html?canteen=11592',
     'school-systems': 'https://eduvize-skolni-systemy.onrender.com/index.html',
     weather: 'https://eduvize-weather.onrender.com/display',
     holidays: 'https://pborovicka72-dotcom.github.io/eduvize-svatky/',
@@ -11,7 +12,7 @@
     documents: 'https://eduvize-dokumenty-api.onrender.com/display',
     news: 'https://eduvize-aktuality.onrender.com/?display=1&v=20261101-all-align-9'
   });
-  const names=Object.freeze({'school-systems':'Školní informační systémy',weather:'Počasí',holidays:'Svátky a jmeniny',transport:'Jízdní řády',wisdom:'Moudrost dne',documents:'Dokumenty školy',news:'Aktuality školy'});
+  const names=Object.freeze({menu:'Jídelníček','school-systems':'Školní informační systémy',weather:'Počasí',holidays:'Svátky a jmeniny',transport:'Jízdní řády',wisdom:'Moudrost dne',documents:'Dokumenty školy',news:'Aktuality školy'});
   function selectApp(item,app){if(!urls[app])return;item.type='app';item.target=app;item.label=names[app];delete item.appUrl;}
   function buttonKey(item){return JSON.stringify([item?.type,item?.target,item?.appUrl||'',item?.label||'']);}
   function weatherText(item){try{return new URL(item.appUrl||item.target).searchParams.get(weatherStyle(item)==='station'?'station_text':'text')!=='off';}catch{return true;}}
@@ -22,12 +23,13 @@
   }
   const paths = {holidays: 'eduvize-svatky', transport: 'eduvize-jizdni-rady',
     wisdom: 'eduvize-moudrost-dne', documents: 'eduvize-dokumenty', news: 'eduvize-aktuality'};
-  const hosts = {'school-systems': 'eduvize-skolni-systemy.onrender.com', weather: 'eduvize-weather.onrender.com', documents: 'eduvize-dokumenty-api.onrender.com',
+  const hosts = {menu:'eduvize-jidelnicek.onrender.com','school-systems': 'eduvize-skolni-systemy.onrender.com', weather: 'eduvize-weather.onrender.com', documents: 'eduvize-dokumenty-api.onrender.com',
     news: 'eduvize-aktuality.onrender.com'};
   function identify(value) {
     let url;
     try { url = new URL(value); } catch { return null; }
     if (!['https:', 'http:'].includes(url.protocol)) return null;
+    if (['127.0.0.1','localhost'].includes(url.hostname) && url.port === '8790') return 'menu';
     for (const [app, path] of Object.entries(paths)) {
       if (url.hostname === 'pborovicka72-dotcom.github.io' &&
           (url.pathname === '/' + path || url.pathname.startsWith('/' + path + '/'))) return app;

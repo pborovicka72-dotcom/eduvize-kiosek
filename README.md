@@ -45,3 +45,6 @@ Pro odkaz na obrázek bez přípony slouží akce `image` (Obrázek URL). Běžn
 Otevírání tlačítek i podrobností sekcí používá stejný `resolveForOpen`. U neznámých URL bez přípony se ověří, zda jde o obrázek; načítání chrání identifikátor požadavku, aby pomalý starší odkaz nepřepsal novější výběr. Zobrazení média nepřebírá procentní zoom webového iframe.
 
 Horní náhled je zdrojem aktuálního pohledu pro náhled segmentu. Při změně segmentu se kopíruje podstránka, otevřený obsah a stránka menu; výběr podstránky v editoru nepřepíše ruční navigaci v horním náhledu.
+
+## Zdroje aktualit v menu
+U tlačítka Aplikace Eduvize → Aktuality školy vyberte Zdroj aktualit. Seznam se načítá z nastavení Aktualit uloženého na OneDrive ve stejném profilu; tlačítko Obnovit zdroje aktualit z profilu načte změny. Bez přihlášení lze zadat vlastní web či RSS přímo. Každé tlačítko uchovává vlastní adresu, metodu a filtr v appUrl, které přežijí uložení, export JSON i sdílený odkaz. Pozdější úprava zdroje v Aktualitách již přiřazené tlačítko nepřepíše; pro převzetí změn zdroj znovu vyberte.

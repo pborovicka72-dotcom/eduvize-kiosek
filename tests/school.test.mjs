@@ -3,12 +3,12 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 class Element {
-  constructor(tag) { this.tagName = tag; this.children = []; this.textContent = ''; this.dataset = {}; }
+  constructor(tag) { this.tagName = tag; this.children = []; this.textContent = ''; this.dataset = {}; this.classList={add(){},remove(){}}; }
   append(...children) { this.children.push(...children); }
   replaceChildren(...children) { this.children = children; }
   remove() { this.removed = true; }
 }
-const document = {createElement: tag => new Element(tag)};
+const document = {querySelector:()=>null,createElement: tag => new Element(tag)};
 const context = {window: {}, document, URL};
 vm.runInNewContext(fs.readFileSync(new URL('../school.js', import.meta.url), 'utf8'), context);
 const school = context.window.EduvizeSchool;

@@ -1,14 +1,14 @@
 /* Shared application routing for the kiosk and its configuration previews. */
 (function (root) {
   'use strict';
-  const version = '20261101-kiosk-light-4';
+  const version = '20261101-kiosk-align-8';
   const urls = Object.freeze({
     weather: 'https://eduvize-weather.onrender.com/display',
     holidays: 'https://pborovicka72-dotcom.github.io/eduvize-svatky/',
     transport: 'https://pborovicka72-dotcom.github.io/eduvize-jizdni-rady/index.html',
     wisdom: 'https://pborovicka72-dotcom.github.io/eduvize-moudrost-dne/index.html',
     documents: 'https://eduvize-dokumenty-api.onrender.com/display',
-    news: 'https://eduvize-aktuality.onrender.com/?display=1&v=20261101-kiosk-light-4'
+    news: 'https://eduvize-aktuality.onrender.com/?display=1&v=20261101-kiosk-align-8'
   });
   const paths = {holidays: 'eduvize-svatky', transport: 'eduvize-jizdni-rady',
     wisdom: 'eduvize-moudrost-dne', documents: 'eduvize-dokumenty', news: 'eduvize-aktuality'};

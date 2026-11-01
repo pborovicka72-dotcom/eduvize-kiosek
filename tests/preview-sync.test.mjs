@@ -8,7 +8,7 @@ const sent=[],frame={contentWindow:{postMessage:m=>sent.push(m)}};
 const controls={subtitle:{value:'School'},showInfoPanel:{checked:true},tileCount:{value:'10'},menuPosition:{value:'left'},menuLayout:{value:'menu'},defaultApp:{value:'weather'},'kiosk-output-type':{value:'kiosk'}};
 const context={c:{pages:[{id:'home'},{id:'school'}]},current:'school',
  livePreviewView:{page:'home',inFrame:true,frameUrl:'https://example.org/app'},
- previewLayoutKey:'',previewRevision:0,previewResetPending:false,
+ previewLayoutKey:'',previewGeometryKey:'',previewRevision:0,previewResetPending:false,
  segOrientation:'landscape',segStyle:1,segBlock:1,
  kioskSegmentHost:{querySelector:()=>frame},$:id=>controls[id],
  normalizeKioskConfig:x=>x,structuredClone,location:{origin:'https://example.org'},
@@ -35,13 +35,17 @@ for(const mutate of [
  ()=>controls.tileCount.value='12',
  ()=>controls.defaultApp.value='holidays',
  ()=>controls['kiosk-output-type'].value='nsp',
- ()=>context.segOrientation='portrait',
- ()=>context.segStyle=2,
- ()=>context.segBlock=2
 ]){
  acknowledge();const revision=context.previewRevision;mutate();context.syncPreviewFrame();
  assert.equal(sent.at(-1).config.previewReset,true);
  assert.equal(sent.at(-1).config.previewPage,'home');
  assert.equal(sent.at(-1).config.previewRevision,revision+1);
 }
-console.log('Preview reset, layout changes and content-only preservation passed.');
+for(const mutate of [()=>context.segOrientation='portrait',()=>context.segStyle=2,()=>context.segBlock=2]){
+ acknowledge();context.livePreviewView={page:'home',inFrame:true,frameUrl:'https://example.org/current'};
+ const revision=context.previewRevision;mutate();context.syncPreviewFrame();
+ assert.equal(sent.at(-1).config.previewReset,undefined,'Geometry alone must preserve opened content.');
+ assert.equal(sent.at(-1).config.previewView.frameUrl,'https://example.org/current');
+ assert.equal(sent.at(-1).config.previewRevision,revision+1,'Reject old frame acknowledgements after geometry changes.');
+}
+console.log('Preview reset, geometry-only content preservation and stale-revision protection passed.');

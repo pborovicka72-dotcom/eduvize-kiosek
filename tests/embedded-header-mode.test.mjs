@@ -9,7 +9,7 @@ for(const outerMode of ['kiosk','nsp']){
  const nav={getBoundingClientRect:()=>({height:1000})};
  const frame={classList:{contains:()=>false},getBoundingClientRect:()=>({width:1400,height:800}),contentWindow:{postMessage:m=>messages.push(m)}};
  const context={document:{body:{classList:{contains:v=>v==='menu-layout'}}},$:id=>id==='tiles'?nav:frame,
-  config:{menuPosition:'left'},innerWidth:1920,innerHeight:1080,
+  kioskHeaderStyle:()=> 'light',config:{menuPosition:'left'},innerWidth:1920,innerHeight:1080,
   getComputedStyle:()=>({rowGap:'10px',paddingTop:'0px',paddingBottom:'0px'}),
   window:{EduvizeOutputModes:{mode:()=>outerMode},EduvizeTileNavigation:{layout:()=>({rows:5})}}};
  vm.runInNewContext(html.slice(start,end),context);

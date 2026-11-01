@@ -1,0 +1,31 @@
+import fs from 'node:fs';
+import vm from 'node:vm';
+import assert from 'node:assert/strict';
+const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
+const start=html.indexOf('function updateNav(){'),end=html.indexOf('// Safari changes',start);
+const hidden=new Set();
+const classes={contains:x=>hidden.has(x),toggle:(x,on)=>on?hidden.add(x):hidden.delete(x)};
+const nodes={navigationActions:{hidden:false,classList:classes},home:{classList:classes},statusPanel:{},schoolContent:{hidden:false},pageContent:{hidden:false}};
+const header={hidden:false},photo={removed:false,remove(){this.removed=true;}};
+const bodyClasses=new Set();
+const context={page:'school',inFrame:true,embeddedPage:null,reportPreviewView(){},queueMicrotask(){},
+ $:id=>nodes[id],config:{menuLayout:false},
+ document:{body:{classList:{contains:x=>bodyClasses.has(x)}},querySelector:()=>header,querySelectorAll:()=>[photo]}};
+vm.runInNewContext(html.slice(start,end),context);
+context.updateNav();
+assert.equal(header.hidden,true,'The school heading must not remain above an application.');
+assert.equal(nodes.schoolContent.hidden,true);
+assert.equal(nodes.pageContent.hidden,true);
+assert.equal(photo.removed,true,'Remove the photograph left behind by O škole.');
+assert.equal(nodes.navigationActions.hidden,false,'Home remains accessible in the bottom navigation.');
+context.page='home';context.inFrame=false;context.updateNav();
+assert.equal(nodes.navigationActions.hidden,true);
+context.page='school';context.updateNav();
+assert.equal(header.hidden,false);
+assert.equal(nodes.navigationActions.hidden,false);
+context.embeddedPage='school';context.updateNav();
+assert.equal(nodes.navigationActions.hidden,true,'An embedded page must not add duplicate Home controls.');
+assert.equal(html.includes('id="back"'),false);
+const footer=html.indexOf('<footer id="navigationActions"');
+assert.ok(footer>html.indexOf('</iframe>')&&footer<html.indexOf('</main>'));
+console.log('Bottom Home navigation and school-content cleanup passed.');

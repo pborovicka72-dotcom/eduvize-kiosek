@@ -1,7 +1,7 @@
 /* Shared application routing for the kiosk and its configuration previews. */
 (function (root) {
   'use strict';
-  const version = '20261101-weather-refinement-1';
+  const version = '20261101-six-independent-3';
   const urls = Object.freeze({
     weather: 'https://eduvize-weather.onrender.com/display',
     holidays: 'https://pborovicka72-dotcom.github.io/eduvize-svatky/',
@@ -13,11 +13,11 @@
   const names=Object.freeze({weather:'Počasí',holidays:'Svátky a jmeniny',transport:'Jízdní řády',wisdom:'Moudrost dne',documents:'Dokumenty školy',news:'Aktuality školy'});
   function selectApp(item,app){if(!urls[app])return;item.type='app';item.target=app;item.label=names[app];delete item.appUrl;}
   function buttonKey(item){return JSON.stringify([item?.type,item?.target,item?.appUrl||'',item?.label||'']);}
-  function weatherText(item){try{return new URL(item.appUrl||item.target).searchParams.get('text')!=='off';}catch{return true;}}
+  function weatherText(item){try{return new URL(item.appUrl||item.target).searchParams.get(weatherStyle(item)==='station'?'station_text':'text')!=='off';}catch{return true;}}
   function setWeatherText(item,enabled){
     if(item.type!=='app'||item.target!=='weather')return;
     const url=identify(item.appUrl)==='weather'?new URL(item.appUrl):new URL(urls.weather);
-    url.searchParams.set('text',enabled?'on':'off');item.appUrl=url.href;
+    url.searchParams.set(weatherStyle(item)==='station'?'station_text':'text',enabled?'on':'off');item.appUrl=url.href;
   }
   const paths = {holidays: 'eduvize-svatky', transport: 'eduvize-jizdni-rady',
     wisdom: 'eduvize-moudrost-dne', documents: 'eduvize-dokumenty', news: 'eduvize-aktuality'};

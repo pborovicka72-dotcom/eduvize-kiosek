@@ -107,8 +107,19 @@ for(const [app,title]of Object.entries(apps.names)){
 }
 const regular={type:'app',target:'weather',label:'Počasí'},station={type:'app',target:'weather',label:'Meteostanice'};
 apps.setWeatherStyle(station,'station');assert.notEqual(apps.buttonKey(regular),apps.buttonKey(station));
-apps.setWeatherText(station,false);assert.equal(apps.resolve(station).searchParams.get('text'),'off');
+apps.setWeatherText(station,false);assert.equal(apps.resolve(station).searchParams.get('station_text'),'off');
 assert.equal(apps.weatherText(station),false);assert.equal(apps.weatherStyle(station),'station');
-apps.setWeatherText(station,true);assert.equal(apps.resolve(station).searchParams.get('text'),'on');
-apps.setWeatherStyle(station,'standard');assert.equal(apps.resolve(station).searchParams.get('text'),'on');
+apps.setWeatherText(station,true);assert.equal(apps.resolve(station).searchParams.get('station_text'),'on');
+apps.setWeatherStyle(station,'standard');assert.equal(apps.weatherText(station),true);
 const saved=JSON.parse(JSON.stringify(station));assert.equal(apps.buttonKey(saved),apps.buttonKey(station));
+
+apps.setWeatherStyle(station,'standard');apps.setWeatherText(station,false);
+assert.equal(apps.weatherText(station),false);
+apps.setWeatherStyle(station,'station');assert.equal(apps.weatherText(station),true);
+apps.setWeatherText(station,false);
+apps.setWeatherStyle(station,'standard');assert.equal(apps.weatherText(station),false);
+apps.setWeatherText(station,true);
+apps.setWeatherStyle(station,'station');assert.equal(apps.weatherText(station),false);
+const independent=apps.resolve(JSON.parse(JSON.stringify(station)));
+assert.equal(independent.searchParams.get('text'),'on');
+assert.equal(independent.searchParams.get('station_text'),'off');

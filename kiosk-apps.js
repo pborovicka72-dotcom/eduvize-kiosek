@@ -1,7 +1,7 @@
 /* Shared application routing for the kiosk and its configuration previews. */
 (function (root) {
   'use strict';
-  const version = '20261101-school-pdf-12';
+  const version = '20261101-weather-refinement-1';
   const urls = Object.freeze({
     weather: 'https://eduvize-weather.onrender.com/display',
     holidays: 'https://pborovicka72-dotcom.github.io/eduvize-svatky/',
@@ -10,6 +10,15 @@
     documents: 'https://eduvize-dokumenty-api.onrender.com/display',
     news: 'https://eduvize-aktuality.onrender.com/?display=1&v=20261101-all-align-9'
   });
+  const names=Object.freeze({weather:'Počasí',holidays:'Svátky a jmeniny',transport:'Jízdní řády',wisdom:'Moudrost dne',documents:'Dokumenty školy',news:'Aktuality školy'});
+  function selectApp(item,app){if(!urls[app])return;item.type='app';item.target=app;item.label=names[app];delete item.appUrl;}
+  function buttonKey(item){return JSON.stringify([item?.type,item?.target,item?.appUrl||'',item?.label||'']);}
+  function weatherText(item){try{return new URL(item.appUrl||item.target).searchParams.get('text')!=='off';}catch{return true;}}
+  function setWeatherText(item,enabled){
+    if(item.type!=='app'||item.target!=='weather')return;
+    const url=identify(item.appUrl)==='weather'?new URL(item.appUrl):new URL(urls.weather);
+    url.searchParams.set('text',enabled?'on':'off');item.appUrl=url.href;
+  }
   const paths = {holidays: 'eduvize-svatky', transport: 'eduvize-jizdni-rady',
     wisdom: 'eduvize-moudrost-dne', documents: 'eduvize-dokumenty', news: 'eduvize-aktuality'};
   const hosts = {weather: 'eduvize-weather.onrender.com', documents: 'eduvize-dokumenty-api.onrender.com',
@@ -105,7 +114,6 @@
     if(item.type!=='url'||identify(item.target)||isImageViewer(url.href))return url;
     const result=await probeImage(url.href)?imageViewer(url.href,base):url;return isImageViewer(result.href)&&root.EduvizeOutputModes?.mode()==='web'?root.EduvizeOutputModes.url(result,'web'):result;
   }
-  root.EduvizeKioskApps = Object.freeze({urls, identify, normalize, weatherStyle, setWeatherStyle, resolve:resolveForOutput, resolveForOpen, isImageViewer, imageSource, refreshUrl, version});
+  root.EduvizeKioskApps = Object.freeze({urls, names, selectApp, buttonKey, weatherText, setWeatherText, identify, normalize, weatherStyle, setWeatherStyle, resolve:resolveForOutput, resolveForOpen, isImageViewer, imageSource, refreshUrl, version});
 })(window);
-
 

@@ -1,7 +1,7 @@
 /* Shared application routing for the kiosk and its configuration previews. */
 (function (root) {
   'use strict';
-  const version = '20261101-school-systems-14';
+  const version = '20261101-header-school-15';
   const urls = Object.freeze({
     'school-systems': 'https://eduvize-skolni-systemy.onrender.com/index.html',
     weather: 'https://eduvize-weather.onrender.com/display',
@@ -117,4 +117,5 @@
   }
   root.EduvizeKioskApps = Object.freeze({urls, names, selectApp, buttonKey, weatherText, setWeatherText, identify, normalize, weatherStyle, setWeatherStyle, resolve:resolveForOutput, resolveForOpen, isImageViewer, imageSource, refreshUrl, version});
 })(window);
+
 

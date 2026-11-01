@@ -74,7 +74,9 @@
     if(kiosk&&photo){
       if(!about){about=node('section','school-card');grid.append(about);}
       about.classList.add('school-card-about');
-      const image=intro.querySelector('.school-photo');if(image)about.prepend(image);
+      const copy=node('div','school-about-copy');copy.append(...about.childNodes);
+      const image=intro.querySelector('.school-photo');
+      if(image){const media=node('figure','school-card-media');media.append(image);about.append(media,copy);}else about.append(copy);
     }
     if (data.address || data.phone || data.email || webUrl(data.website)) {
       const contact = node('section', 'school-card school-card-contact');
@@ -99,11 +101,8 @@
       card('Informace o škole', 'Informace o škole budou brzy doplněny.', true);
     }
     if(kiosk){
-      const cards=[...grid.children];
-      root.EduvizePagedPanel.mountFlow(host,cards,{key:'school',fit:false,preferWhole:true,label:'Stránkování informací o škole',render:(page,items)=>{
-        page.className='edu-paged-content school-sheet';
-        const layout=node('div','school-cards school-photo-layout');layout.append(...items);page.append(layout);
-      }});
+      host.classList.remove('edu-paged-panel');
+      grid.classList.add('school-photo-layout');sheet.append(grid);host.append(sheet);
     }else{sheet.append(grid);host.append(sheet);}
   }
   function editor(host, getConfig, onChange) {
@@ -141,4 +140,5 @@
   }
   root.EduvizeSchool = Object.freeze({values, webUrl, render, editor, limits});
 })(window);
+
 

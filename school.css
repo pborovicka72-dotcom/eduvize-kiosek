@@ -1,1 +1,18 @@
 #schoolContent{flex:1 1 auto;min-height:0;min-width:0;overflow:hidden;padding:0;position:relative}#schoolContent[hidden]{display:none}body.school-open .wrap>#hero{display:none}body.school-open.frame-open #schoolContent{display:none}.school-editor-wide{grid-column:1/-1}.school-editor-grid textarea{width:100%}.school-field-counter{color:var(--ev-muted);font-size:12px;font-weight:400}
+
+
+/* The school photograph is content, with its natural landscape proportions. */
+html[data-kiosk-app="kiosk"]:not(.web-output) #schoolContent .school-card-about .school-photo{width:100%;height:auto;aspect-ratio:16/9;max-height:24vh;object-fit:contain;align-self:stretch;flex:none;margin:0 0 .3em;border-radius:var(--ev-control-radius)}
+html[data-kiosk-app="kiosk"]:not(.web-output) #schoolContent .school-card-about{grid-column:1/-1}
+html[data-kiosk-app="kiosk"]:not(.web-output) #schoolContent .school-sheet{min-height:0}
+html[data-kiosk-app="kiosk"]:not(.web-output) #schoolContent .school-cards{grid-auto-rows:minmax(min-content,1fr);align-content:stretch}
+html[data-kiosk-app="kiosk"]:not(.web-output) #schoolContent .edu-paged-stage{min-height:0}
+html[data-kiosk-app="kiosk"]:not(.web-output) #schoolContent .edu-pagination{padding:6px;background:var(--ev-surface)}
+
+html[data-kiosk-app="kiosk"]:not(.web-output) #schoolContent[data-content-shape="landscape"] .school-photo-layout:has(.school-card-about):has(.school-card-contact):has(.school-card-details):has(.school-card-visitors){grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:minmax(min-content,1fr) auto}
+html[data-kiosk-app="kiosk"]:not(.web-output) #schoolContent[data-content-shape="landscape"] .school-photo-layout:has(.school-card-about):has(.school-card-contact):has(.school-card-details):has(.school-card-visitors)>.school-card-about{grid-column:1;grid-row:1/span 2}
+html[data-kiosk-app="kiosk"]:not(.web-output) #schoolContent[data-content-shape="landscape"] .school-photo-layout:has(.school-card-about):has(.school-card-contact):has(.school-card-details):has(.school-card-visitors)>.school-card-contact{grid-column:2;grid-row:1}
+html[data-kiosk-app="kiosk"]:not(.web-output) #schoolContent[data-content-shape="landscape"] .school-photo-layout:has(.school-card-about):has(.school-card-contact):has(.school-card-details):has(.school-card-visitors)>.school-card-details{grid-column:3;grid-row:1}
+html[data-kiosk-app="kiosk"]:not(.web-output) #schoolContent[data-content-shape="landscape"] .school-photo-layout:has(.school-card-about):has(.school-card-contact):has(.school-card-details):has(.school-card-visitors)>.school-card-visitors{grid-column:2/4;grid-row:2}
+
+html[data-kiosk-app="kiosk"]:not(.web-output) #schoolContent .school-card{padding:.55em .65em;gap:.3em}

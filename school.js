@@ -35,6 +35,7 @@
   }
   function render(host, config, onOpen) {
     const data = values(config);
+    const kiosk=root.EduvizeOutputModes?.mode?.()!=='web';
     if(root.EduvizeOutputModes?.mode?.()!=='web')for(const [key,limit] of Object.entries(limits))data[key]=shorten(data[key],limit);
     host.replaceChildren();
     delete host.dataset.eduFit;root.EduvizeContentSurface?.mount(host,{fit:true});
@@ -58,7 +59,7 @@
       if(data.name)title.textContent=data.name;
       if(data.motto){subtitle.textContent=data.motto;subtitle.hidden=false;}
       sharedHeader.querySelectorAll('.school-photo').forEach(image=>image.remove());
-      const headerPhoto=intro.querySelector('.school-photo');if(headerPhoto)sharedHeader.append(headerPhoto);
+      const headerPhoto=intro.querySelector('.school-photo');if(headerPhoto&&!kiosk)sharedHeader.append(headerPhoto);
       root.EduvizeOutputHeader?.update();
     }else sheet.append(intro);
     const grid = node('div', 'school-cards');
@@ -69,9 +70,14 @@
       grid.append(section);
       return section;
     }
-    card('O škole', data.description, true);
+    let about=card('O škole', data.description, true);
+    if(kiosk&&photo){
+      if(!about){about=node('section','school-card');grid.append(about);}
+      about.classList.add('school-card-about');
+      const image=intro.querySelector('.school-photo');if(image)about.prepend(image);
+    }
     if (data.address || data.phone || data.email || webUrl(data.website)) {
-      const contact = node('section', 'school-card');
+      const contact = node('section', 'school-card school-card-contact');
       contact.append(node('h3', '', 'Adresa a kontakt'));
       if(data.address) contact.append(node('p', 'school-text school-address', data.address));
       if(data.phone)contact.append(node('p','school-contact',data.phone));
@@ -80,7 +86,7 @@
       grid.append(contact);
     }
     if (data.director || data.officeHours || data.ico) {
-      const details = node('section', 'school-card');
+      const details = node('section', 'school-card school-card-details');
       details.append(node('h3', '', 'Vedení a provoz'));
       for(const [label,value] of [['Ředitel / ředitelka',data.director],['Úřední hodiny',data.officeHours],['IČO',data.ico]]) {
         if(!value) continue;
@@ -92,8 +98,13 @@
     if (!grid.children.length && !data.name && !data.motto && !photo) {
       card('Informace o škole', 'Informace o škole budou brzy doplněny.', true);
     }
-    sheet.append(grid);
-    host.append(sheet);
+    if(kiosk){
+      const cards=[...grid.children];
+      root.EduvizePagedPanel.mountFlow(host,cards,{key:'school',fit:false,preferWhole:true,label:'Stránkování informací o škole',render:(page,items)=>{
+        page.className='edu-paged-content school-sheet';
+        const layout=node('div','school-cards school-photo-layout');layout.append(...items);page.append(layout);
+      }});
+    }else{sheet.append(grid);host.append(sheet);}
   }
   function editor(host, getConfig, onChange) {
     host.replaceChildren();
@@ -130,3 +141,4 @@
   }
   root.EduvizeSchool = Object.freeze({values, webUrl, render, editor, limits});
 })(window);
+

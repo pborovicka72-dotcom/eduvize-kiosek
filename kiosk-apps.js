@@ -1,8 +1,9 @@
 /* Shared application routing for the kiosk and its configuration previews. */
 (function (root) {
   'use strict';
-  const version = '20261101-six-independent-3';
+  const version = '20261101-school-systems-14';
   const urls = Object.freeze({
+    'school-systems': 'https://eduvize-skolni-systemy.onrender.com/index.html',
     weather: 'https://eduvize-weather.onrender.com/display',
     holidays: 'https://pborovicka72-dotcom.github.io/eduvize-svatky/',
     transport: 'https://pborovicka72-dotcom.github.io/eduvize-jizdni-rady/index.html',
@@ -10,7 +11,7 @@
     documents: 'https://eduvize-dokumenty-api.onrender.com/display',
     news: 'https://eduvize-aktuality.onrender.com/?display=1&v=20261101-all-align-9'
   });
-  const names=Object.freeze({weather:'Počasí',holidays:'Svátky a jmeniny',transport:'Jízdní řády',wisdom:'Moudrost dne',documents:'Dokumenty školy',news:'Aktuality školy'});
+  const names=Object.freeze({'school-systems':'Školní informační systémy',weather:'Počasí',holidays:'Svátky a jmeniny',transport:'Jízdní řády',wisdom:'Moudrost dne',documents:'Dokumenty školy',news:'Aktuality školy'});
   function selectApp(item,app){if(!urls[app])return;item.type='app';item.target=app;item.label=names[app];delete item.appUrl;}
   function buttonKey(item){return JSON.stringify([item?.type,item?.target,item?.appUrl||'',item?.label||'']);}
   function weatherText(item){try{return new URL(item.appUrl||item.target).searchParams.get(weatherStyle(item)==='station'?'station_text':'text')!=='off';}catch{return true;}}
@@ -21,7 +22,7 @@
   }
   const paths = {holidays: 'eduvize-svatky', transport: 'eduvize-jizdni-rady',
     wisdom: 'eduvize-moudrost-dne', documents: 'eduvize-dokumenty', news: 'eduvize-aktuality'};
-  const hosts = {weather: 'eduvize-weather.onrender.com', documents: 'eduvize-dokumenty-api.onrender.com',
+  const hosts = {'school-systems': 'eduvize-skolni-systemy.onrender.com', weather: 'eduvize-weather.onrender.com', documents: 'eduvize-dokumenty-api.onrender.com',
     news: 'eduvize-aktuality.onrender.com'};
   function identify(value) {
     let url;

@@ -8,7 +8,7 @@ const classes={contains:x=>hidden.has(x),toggle:(x,on)=>on?hidden.add(x):hidden.
 const nodes={navigationActions:{hidden:false,classList:classes},home:{classList:classes},statusPanel:{},schoolContent:{hidden:false},pageContent:{hidden:false}};
 const header={hidden:false},photo={removed:false,remove(){this.removed=true;}};
 const bodyClasses=new Set();
-const context={page:'school',inFrame:true,embeddedPage:null,reportPreviewView(){},queueMicrotask(){},
+const context={requestAnimationFrame(){},fitWebsite(){},page:'school',inFrame:true,embeddedPage:null,reportPreviewView(){},queueMicrotask(){},
  $:id=>nodes[id],config:{menuLayout:false},
  document:{body:{classList:{contains:x=>bodyClasses.has(x)}},querySelector:()=>header,querySelectorAll:()=>[photo]}};
 vm.runInNewContext(html.slice(start,end),context);

@@ -1,9 +1,9 @@
 /* Shared application routing for the kiosk and its configuration previews. */
 (function (root) {
   'use strict';
-  const version = '20261101-menu-20';
+  const version = '20261101-menu-22';
   const urls = Object.freeze({
-    menu: 'http://127.0.0.1:8790/index.html?canteen=11592',
+    menu: 'https://eduvize-jidelnicek.onrender.com/index.html?canteen=11592',
     'school-systems': 'https://eduvize-skolni-systemy.onrender.com/index.html',
     weather: 'https://eduvize-weather.onrender.com/display',
     holidays: 'https://pborovicka72-dotcom.github.io/eduvize-svatky/',

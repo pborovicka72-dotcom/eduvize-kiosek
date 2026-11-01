@@ -43,6 +43,17 @@
     }
     return config;
   }
+  function weatherStyle(item) {
+    try { return new URL(item.appUrl || item.target).searchParams.get('weather_style') === 'station' ? 'station' : 'standard'; }
+    catch { return 'standard'; }
+  }
+  function setWeatherStyle(item, style) {
+    if (item.type !== 'app' || item.target !== 'weather') return;
+    const url = identify(item.appUrl) === 'weather' ? new URL(item.appUrl) : new URL(urls.weather);
+    url.searchParams.set('weather_style', style === 'station' ? 'station' : 'standard');
+    item.appUrl = url.href;
+    item.label = style === 'station' ? 'Meteostanice' : 'Počasí';
+  }
   function resolve(item, base) {
     if(item.type!=='image'){const file=documentFile(item.type==='app'?item.appUrl:item.target);if(file)return file;}
     if(item.type==='image'||(['url','document'].includes(item.type)&&imageSource(item.target)))return imageViewer(item.target,base);
@@ -94,6 +105,6 @@
     if(item.type!=='url'||identify(item.target)||isImageViewer(url.href))return url;
     const result=await probeImage(url.href)?imageViewer(url.href,base):url;return isImageViewer(result.href)&&root.EduvizeOutputModes?.mode()==='web'?root.EduvizeOutputModes.url(result,'web'):result;
   }
-  root.EduvizeKioskApps = Object.freeze({urls, identify, normalize, resolve:resolveForOutput, resolveForOpen, isImageViewer, imageSource, refreshUrl, version});
+  root.EduvizeKioskApps = Object.freeze({urls, identify, normalize, weatherStyle, setWeatherStyle, resolve:resolveForOutput, resolveForOpen, isImageViewer, imageSource, refreshUrl, version});
 })(window);
 

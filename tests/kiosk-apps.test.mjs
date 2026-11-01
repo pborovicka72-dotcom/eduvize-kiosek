@@ -61,3 +61,20 @@ const documents=apps.resolve({type:'app',target:'documents'});
 assert.equal(documents.hostname,'eduvize-dokumenty-api.onrender.com');assert.equal(documents.pathname,'/display');
 const legacyDocuments=apps.resolve({type:'url',target:'https://pborovicka72-dotcom.github.io/eduvize-dokumenty/index.html?pdf_columns=2'});
 assert.equal(legacyDocuments.hostname,'eduvize-dokumenty-api.onrender.com');assert.equal(legacyDocuments.searchParams.get('pdf_columns'),'2');
+
+/* Restoring a preview must refresh its application version without losing settings. */
+for (const [app, target] of Object.entries(apps.urls)) {
+ const old = new URL(target);
+ old.searchParams.set('eduvize_ui_version', 'old');
+ old.searchParams.set('station', 'saved-station');
+ old.searchParams.set('limit', '6');
+ const restored = apps.refreshUrl(old.href);
+ assert.equal(restored.searchParams.get('eduvize_ui_version'), apps.version, app);
+ assert.equal(restored.searchParams.get('station'), 'saved-station', app);
+ assert.equal(restored.searchParams.get('limit'), '6', app);
+}
+const externalFrame='https://example.org/?viewMode=web&zoom=80';
+assert.equal(apps.refreshUrl(externalFrame).href,externalFrame);
+const restoredImage=apps.refreshUrl('https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/image-viewer.html?src=https%3A%2F%2Fexample.org%2Fimage.png&v=old');
+assert.equal(restoredImage.searchParams.get('v'),apps.version);
+assert.equal(restoredImage.searchParams.get('src'),'https://example.org/image.png');

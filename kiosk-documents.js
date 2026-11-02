@@ -4,7 +4,8 @@
   const token=()=>root.EduvizeAdminAuth.getToken('documents');let documents=[];let categories=['Ostatní'];const views=new Set();let pending;
   async function refresh(includeCloud=true){
     if(!pending)pending=(async()=>{
-      const response=await fetch(base+'/api/documents?scope=kiosk',{cache:'no-store'});const data=await response.json();if(!response.ok)throw Error(data.detail||'Chyba serveru '+response.status);
+      await root.EduvizeAdminAuth.ready;const pid=root.EduvizeAdminAuth.status().profileId;if(!pid)throw Error('Nejprve se přihlaste k účtu školy.');
+      const response=await fetch(base+'/api/documents?scope=kiosk&edu-profile='+encodeURIComponent(pid),{cache:'no-store'});const data=await response.json();if(!response.ok)throw Error(data.detail||'Chyba serveru '+response.status);
       documents=Array.isArray(data.items)?data.items:[];
       let categoryError;
       await root.EduvizeAdminAuth.ready;if(token()){try{const r=await root.EduvizeAdminAuth.fetch(base+'/api/admin/categories?scope=kiosk',{},'documents');const data=await r.json();if(!r.ok)throw Error(data.detail||'Nelze načíst kategorie');categories=data.categories||[];}catch(e){categoryError=e;}}
@@ -18,7 +19,7 @@
   function remember(doc){if(!doc?.id)return;const index=documents.findIndex(x=>String(x.id)===String(doc.id));if(index<0)documents.push(doc);else documents[index]=doc;}
   function assignedId(item){try{return new URL(item.target,base).searchParams.get('document')||''}catch{return ''}}
 
-  function viewer(id){const url=new URL('/display',base);url.searchParams.set('document',id);url.searchParams.set('viewMode','kiosk');url.searchParams.set('output','kiosk');return url.href;}
+  function viewer(id){const url=new URL('/display',base);url.searchParams.set('document',id);const pid=root.EduvizeAdminAuth.status().profileId;if(pid)url.searchParams.set('edu-profile',pid);url.searchParams.set('viewMode','kiosk');url.searchParams.set('output','kiosk');return url.href;}
   function node(tag,className,text){const e=document.createElement(tag);if(className)e.className=className;if(text!==undefined)e.textContent=text;return e;}
   function editor(host,item,onChange){
     const panel=node('div','document-button-editor');
@@ -28,7 +29,7 @@
     select.onchange=()=>{if(!select.value)return;item.target=viewer(select.value);item.label=select.selectedOptions[0].textContent;onChange();};
     const form=node('form','edu-document-upload');
     const fields=node('div','edu-admin__field-grid');
-    const fileLabel=node('label','','Soubor (nejvýše 20 MB)');const file=node('input');file.type='file';file.required=true;fileLabel.append(file);
+    const fileLabel=node('label','','Soubor (nejvýše 100 MB)');const file=node('input');file.type='file';file.required=true;fileLabel.append(file);
     const categoryLabel=node('label','','Kategorie');const category=node('select');for(const name of categories)category.append(new Option(name,name));categoryLabel.append(category);fields.append(fileLabel,categoryLabel);
     const button=node('button','edu-admin__button','Nahrát a přiřadit dokument');button.type='submit';
     const progress=node('div');progress.hidden=true;progress.setAttribute('aria-live','polite');const bar=node('progress');bar.max=100;bar.value=0;const message=node('div');progress.append(bar,message);form.append(fields,button,progress);panel.append(form);host.append(panel);

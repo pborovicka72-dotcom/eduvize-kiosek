@@ -38,7 +38,7 @@
     for (const [app, host] of Object.entries(hosts)) if (url.hostname === host) return app;
     return null;
   }
-  function documentFile(value){try{const u=new URL(value);if(u.hostname==='eduvize-dokumenty-api.onrender.com'&&u.pathname==='/display'&&u.searchParams.has('document')){u.searchParams.set('viewMode','kiosk');u.searchParams.set('output','kiosk');u.searchParams.set('eduvize_ui_version',version);return u;}const match=u.hostname==='eduvize-dokumenty-api.onrender.com'&&u.pathname.match(/^\/api\/documents\/([^/]+)\/file$/);if(!match)return null;const view=new URL('https://eduvize-dokumenty-api.onrender.com/display');view.searchParams.set('document',decodeURIComponent(match[1]));view.searchParams.set('viewMode','kiosk');view.searchParams.set('output','kiosk');view.searchParams.set('eduvize_ui_version',version);return view;}catch{return null;}}
+  function documentFile(value){try{const u=new URL(value);if(u.hostname==='eduvize-dokumenty-api.onrender.com'&&u.pathname==='/display'&&u.searchParams.has('document')){u.searchParams.set('viewMode','kiosk');u.searchParams.set('interaction','interactive');u.searchParams.set('output','kiosk');u.searchParams.set('eduvize_ui_version',version);return u;}const match=u.hostname==='eduvize-dokumenty-api.onrender.com'&&u.pathname.match(/^\/api\/documents\/([^/]+)\/file$/);if(!match)return null;const view=new URL('https://eduvize-dokumenty-api.onrender.com/display');view.searchParams.set('document',decodeURIComponent(match[1]));view.searchParams.set('viewMode','kiosk');view.searchParams.set('interaction','interactive');view.searchParams.set('output','kiosk');view.searchParams.set('eduvize_ui_version',version);return view;}catch{return null;}}
   function imageSource(value){try{const u=new URL(value);return ['http:','https:'].includes(u.protocol)&&(/\.(?:png|jpe?g|gif|webp|avif|svg|bmp)(?:$)/i.test(u.pathname)||/^encrypted-tbn\d*\.gstatic\.com$/i.test(u.hostname)||u.hostname==='images.unsplash.com');}catch{return false;}}
   function imageViewer(value,base){const source=new URL(value,base);if(!['http:','https:'].includes(source.protocol))return null;const viewer=new URL('https://pborovicka72-dotcom.github.io/eduvize-styly/design-system/image-viewer.html');viewer.searchParams.set('src',source.href);viewer.searchParams.set('v',version);return viewer;}
   function normalize(config) {
@@ -83,7 +83,7 @@
     if (!['https:', 'http:'].includes(url.protocol)) return null;
     if (app) {
       url.pathname = canonical.pathname;
-      url.searchParams.set('viewMode', 'kiosk');
+      url.searchParams.set('viewMode', 'kiosk');url.searchParams.set('interaction','interactive');
       url.searchParams.set('output', 'kiosk');
       url.searchParams.set('eduvize_ui_version', version);
       if (app === 'news') url.searchParams.set('display', '1');

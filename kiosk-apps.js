@@ -1,7 +1,7 @@
 /* Shared application routing for the kiosk and its configuration previews. */
 (function (root) {
   'use strict';
-  const version = '20261102-weather-stable-1';
+  const version = '20261102-paint-stable-2';
   const urls = Object.freeze({
     'day-progress':'https://eduvize-prubeh-dne.onrender.com/index.html',
     menu: 'https://eduvize-jidelnicek.onrender.com/index.html?canteen=11592',

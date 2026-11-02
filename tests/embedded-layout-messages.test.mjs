@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
+const start=html.indexOf("let lastEmbeddedLayout='';");
+const code=html.slice(start,html.indexOf("window.addEventListener('resize',syncEmbeddedHeader)",start));
+const messages=[];let height=500;
+const frame={src:'https://weather.example/display',classList:{contains:()=>false},getBoundingClientRect:()=>({width:1000,height:700}),contentWindow:{postMessage(data){messages.push(data);}}};
+const nav={getBoundingClientRect:()=>({height})};
+const context={document:{body:{classList:{contains:()=>true}}},window:{EduvizeTileNavigation:{layout:()=>({rows:5})}},$:id=>id==='tiles'?nav:frame,kioskHeaderStyle:()=> 'light',config:{menuPosition:'left'},innerWidth:1280,innerHeight:720,getComputedStyle:()=>({rowGap:'0px',paddingTop:'0px',paddingBottom:'0px'})};
+vm.runInNewContext(code,context);
+for(let i=0;i<100;i++)context.syncEmbeddedHeader();
+assert.equal(messages.length,1,'Regular polling must not resend an identical layout');
+context.syncEmbeddedHeader({type:'resize'});assert.equal(messages.length,1);
+height=600;context.syncEmbeddedHeader();assert.equal(messages.length,2);
+context.syncEmbeddedHeader(true);assert.equal(messages.length,3,'A newly loaded iframe must receive its layout even when unchanged');
+frame.src='https://weather.example/display?mode=station';context.syncEmbeddedHeader();assert.equal(messages.length,4);
+console.log('Kiosk polling sends layout only on changes, navigation and explicit iframe load.');

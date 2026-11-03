@@ -1,8 +1,10 @@
 /* Shared application routing for the kiosk and its configuration previews. */
 (function (root) {
   'use strict';
-  const version = '20261102-weather-content-3';
+  const version = '20261103-app-selection-1';
   const urls = Object.freeze({
+    gallery:'https://pborovicka72-dotcom.github.io/eduvize-styly/fotogalerie/index.html',
+    'school-calendar':'https://pborovicka72-dotcom.github.io/eduvize-styly/experimental/school-calendar/',
     'day-progress':'https://eduvize-prubeh-dne.onrender.com/index.html',
     menu: 'https://eduvize-jidelnicek.onrender.com/index.html?canteen=11592',
     'school-systems': 'https://eduvize-skolni-systemy.onrender.com/index.html',
@@ -13,8 +15,34 @@
     documents: 'https://eduvize-dokumenty-api.onrender.com/display',
     news: 'https://eduvize-aktuality.onrender.com/?display=1&v=20261101-all-align-9'
   });
-  const names=Object.freeze({'day-progress':'Průběh dne',menu:'Jídelníček','school-systems':'Školní informační systémy',weather:'Počasí',holidays:'Svátky a jmeniny',transport:'Jízdní řády',wisdom:'Moudrost dne',documents:'Dokumenty školy',news:'Aktuality školy'});
-  function selectApp(item,app){if(!urls[app])return;item.type='app';item.target=app;item.label=names[app];delete item.appUrl;}
+  const names=Object.freeze({gallery:'Fotogalerie','school-calendar':'Školní kalendář','day-progress':'Průběh dne',menu:'Jídelníček','school-systems':'Školní informační systémy',weather:'Počasí',holidays:'Svátky a jmeniny',transport:'Jízdní řády',wisdom:'Moudrost dne',documents:'Dokumenty školy',news:'Aktuality školy'});
+  function selectApp(item,app){if(!urls[app])return;item.type='app';item.target=app;item.label=names[app];delete item.appUrl;if(app==='school-systems')item.appUrl=urls[app]+'?view=timetable';}
+
+  const schoolViews=Object.freeze({overview:'Školní přehled',timetable:'Rozvrhy tříd · aktuální',permanent:'Rozvrhy tříd · stálé',teacher_timetable:'Rozvrhy učitelů · aktuální',teacher_permanent:'Rozvrhy učitelů · stálé',changes:'Suplování',staffchanges:'Náhrady učitelů',guards:'Změny dozorů',events:'Události',notices:'Oznámení'});
+  const schoolProviders=Object.freeze({bakalari:'Bakaláři',edupage:'EduPage',edookit:'Edookit',skolaonline:'Škola OnLine'});
+  function schoolSettings(item){
+    const u=new URL(identify(item.appUrl)==='school-systems'?item.appUrl:urls['school-systems']);
+    return {provider:Object.hasOwn(schoolProviders,u.searchParams.get('provider'))?u.searchParams.get('provider'):'bakalari',view:Object.hasOwn(schoolViews,u.searchParams.get('view'))?u.searchParams.get('view'):'permanent'};
+  }
+  function setSchoolSetting(item,key,value){
+    if(item.type!=='app'||item.target!=='school-systems'||!Object.hasOwn(key==='provider'?schoolProviders:key==='view'?schoolViews:{},value))return;
+    const u=new URL(identify(item.appUrl)==='school-systems'?item.appUrl:urls['school-systems']);
+    u.searchParams.set(key,value);item.appUrl=u.href;
+  }
+  function schoolEditor(host,item,onChange){
+    const settings=schoolSettings(item);
+    for(const [key,title,options] of [['provider','Školní systém',schoolProviders],['view','Typ obsahu',schoolViews]]){
+      const label=document.createElement('label');label.className='edu-admin__field';label.textContent=title;
+      const select=document.createElement('select');
+      for(const [value,name] of Object.entries(options)){const option=document.createElement('option');option.value=value;option.textContent=name;select.append(option);}
+      select.value=settings[key];select.onchange=()=>{setSchoolSetting(item,key,select.value);onChange();};label.append(select);host.append(label);
+    }
+    const hint=document.createElement('p');hint.className='edu-admin__hint';hint.textContent='Dostupnost obsahu závisí na připojeném systému a oprávněních školy. Další nastavení lze převzít vložením odkazu z administrace Školních systémů.';host.append(hint);
+    const label=document.createElement('label');label.className='edu-admin__field';label.textContent='Nastavený odkaz ze Školních systémů (volitelné)';
+    const input=document.createElement('input');input.type='url';input.value=item.appUrl||'';input.placeholder=urls['school-systems'];
+    input.onchange=()=>{const value=input.value.trim();if(value&&identify(value)!=='school-systems'){input.setCustomValidity('Vložte odkaz na aplikaci Školní informační systémy.');input.reportValidity();return;}input.setCustomValidity('');if(value)item.appUrl=value;else delete item.appUrl;onChange();};label.append(input);host.append(label);
+  }
+
   function buttonKey(item){return JSON.stringify([item?.type,item?.target,item?.appUrl||'',item?.label||'']);}
   function weatherText(item){try{return new URL(item.appUrl||item.target).searchParams.get(weatherStyle(item)==='station'?'station_text':'text')!=='off';}catch{return true;}}
   function setWeatherText(item,enabled){
@@ -22,7 +50,7 @@
     const url=identify(item.appUrl)==='weather'?new URL(item.appUrl):new URL(urls.weather);
     url.searchParams.set(weatherStyle(item)==='station'?'station_text':'text',enabled?'on':'off');item.appUrl=url.href;
   }
-  const paths = {holidays: 'eduvize-svatky', transport: 'eduvize-jizdni-rady',
+  const paths = {gallery:'eduvize-styly/fotogalerie','school-calendar':'eduvize-styly/experimental/school-calendar',holidays: 'eduvize-svatky', transport: 'eduvize-jizdni-rady',
     wisdom: 'eduvize-moudrost-dne', documents: 'eduvize-dokumenty', news: 'eduvize-aktuality'};
   const hosts = {'day-progress':'eduvize-prubeh-dne.onrender.com',menu:'eduvize-jidelnicek.onrender.com','school-systems': 'eduvize-skolni-systemy.onrender.com', weather: 'eduvize-weather.onrender.com', documents: 'eduvize-dokumenty-api.onrender.com',
     news: 'eduvize-aktuality.onrender.com'};
@@ -118,7 +146,7 @@
     if(item.type!=='url'||identify(item.target)||isImageViewer(url.href))return url;
     const result=await probeImage(url.href)?imageViewer(url.href,base):url;return isImageViewer(result.href)&&root.EduvizeOutputModes?.mode()==='web'?root.EduvizeOutputModes.url(result,'web'):result;
   }
-  root.EduvizeKioskApps = Object.freeze({urls, names, selectApp, buttonKey, weatherText, setWeatherText, identify, normalize, weatherStyle, setWeatherStyle, resolve:resolveForOutput, resolveForOpen, isImageViewer, imageSource, refreshUrl, version});
+  root.EduvizeKioskApps = Object.freeze({urls, names, schoolViews, schoolProviders, schoolSettings, setSchoolSetting, schoolEditor, selectApp, buttonKey, weatherText, setWeatherText, identify, normalize, weatherStyle, setWeatherStyle, resolve:resolveForOutput, resolveForOpen, isImageViewer, imageSource, refreshUrl, version});
 })(window);
 
 

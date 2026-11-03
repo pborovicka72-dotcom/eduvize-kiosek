@@ -1,0 +1,15 @@
+/* Kiosk-specific composition; colors and controls are shared design tokens. */
+ .kiosk-remote-pair{display:grid;justify-items:center;align-content:center;gap:4px;margin-left:clamp(8px,1vmin,24px);padding-left:clamp(8px,1vmin,24px);border-left:1px solid currentColor;flex:0 1 auto;min-width:0;max-width:26%;max-height:100%}
+.kiosk-remote-pair img{display:block;background:#fff;width:112px;height:112px;aspect-ratio:1;max-width:100%;border-radius:4px}
+.kiosk-remote-pair img[hidden],.kiosk-remote-pair button[hidden]{display:none}
+.kiosk-remote-pair>div{display:grid;gap:4px;text-align:center;font-size:clamp(10px,.9vmin,20px);line-height:1.2}
+.kiosk-remote-pair strong{font-size:inherit}.kiosk-remote-pair:not(.kiosk-remote-pair--connected) span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.kiosk-remote-pair button{font-size:.9em;min-height:32px;padding:6px 10px}
+.remote-controller{margin:0;background:var(--ev-bg,#edf2f9);color:var(--ev-text,#142d50);font-family:var(--ev-font-family,Arial,sans-serif)}
+.remote-controller main{max-width:650px;margin:auto;padding:20px 16px calc(24px + env(safe-area-inset-bottom))}
+.remote-controller header{display:flex;align-items:center;gap:16px;padding:20px;margin-bottom:18px;background:var(--ev-primary,#142d50);color:var(--ev-primary-text,#fff);border-radius:var(--ev-card-radius,16px)}
+.remote-controller header img{width:48px;height:48px;object-fit:contain}.remote-controller h1{font-size:24px;line-height:1.2;margin:0}.remote-controller header p{font-size:11px;letter-spacing:.08em;margin:0 0 6px}
+.remote-controller #status{line-height:1.5;margin:0 0 8px}.remote-menu{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:20px 0}
+.remote-menu .remote-menu__item{min-height:76px;padding:16px;white-space:normal;overflow-wrap:anywhere;line-height:1.3;font-size:17px;text-align:center}
+.remote-controller #leave{width:100%;margin-top:12px}.remote-controller [hidden]{display:none}
+@media(max-width:340px){.remote-menu{grid-template-columns:1fr}}

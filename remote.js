@@ -1,0 +1,13 @@
+(async function(){
+ const R=window.EduvizeRemote,$=id=>document.getElementById(id),match=location.hash.slice(1).match(/^([\w-]{32})\.([\w-]{43})$/);history.replaceState(null,'',location.pathname+location.search);
+ let session,controller,state,stopped=false,busy=false,failures=0,lastMenu='';
+ function say(value){$('status').textContent=value;}
+ function end(message){stopped=true;controller=null;$('menu').replaceChildren();$('leave').hidden=true;$('hint').textContent='Pro nové spojení načtěte QR kód na kiosku.';say(message);}
+ function draw(value){state=value;const key=JSON.stringify(value);if(key===lastMenu)return;lastMenu=key;$('screenTitle').textContent=value.title||'Kiosek';$('menu').replaceChildren();for(const item of value.items){const button=document.createElement('button');button.className='edu-admin__button remote-menu__item'+(item.active?'':' edu-admin__button--secondary');button.textContent=item.label;button.setAttribute('aria-pressed',String(!!item.active));button.disabled=busy;button.onclick=()=>send(item.id);$('menu').append(button);}}
+ async function send(id){if(busy||stopped)return;busy=true;$('menu').querySelectorAll('button').forEach(b=>b.disabled=true);say('Odesílám volbu…');try{await R.request('/sessions/'+session+'/commands',controller,{id,revision:state.revision,requestId:crypto.randomUUID()});say('Volba odeslána na obrazovku.');}catch(e){say(e.message);if([401,410].includes(e.status))end(e.message);}finally{busy=false;$('menu').querySelectorAll('button').forEach(b=>b.disabled=false);}}
+ async function poll(){if(stopped)return;try{const value=await R.request('/sessions/'+session+'/state',controller);draw(value.snapshot);$('menu').querySelectorAll('button').forEach(b=>b.disabled=busy);failures=0;if(!busy)say('Připojeno k obrazovce · vyberte položku');}catch(e){failures++;$('menu').querySelectorAll('button').forEach(b=>b.disabled=true);if([401,410].includes(e.status))return end(e.message);say('Spojení je přerušené. Zkouším znovu…');}if(!stopped)setTimeout(poll,failures?3000:1500);}
+ $('leave').onclick=async()=>{if(busy)return;busy=true;try{await R.request('/sessions/'+session+'/leave',controller,{});end('Ovládání bylo ukončeno.');}catch(e){say(e.message);}finally{busy=false;}};
+ if(!match)return end('Nejprve načtěte QR kód na obrazovce kiosku.');
+ session=match[1];try{const joined=await R.request('/sessions/'+session+'/join',match[2],{});controller=joined.controller;draw(joined.snapshot);$('leave').hidden=false;poll();}catch(e){end(e.message);}
+ window.addEventListener('pagehide',()=>{stopped=true;});window.addEventListener('pageshow',e=>{if(e.persisted&&controller){stopped=false;poll();}});
+})();

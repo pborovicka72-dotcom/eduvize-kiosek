@@ -14,3 +14,11 @@
 .remote-menu .remote-menu__item{min-height:76px;padding:16px;white-space:normal;overflow-wrap:anywhere;line-height:1.3;font-size:17px;text-align:center}
 .remote-controller #leave{width:100%;margin-top:12px}.remote-controller [hidden]{display:none}
 @media(max-width:340px){.remote-menu{grid-template-columns:1fr}}
+
+.kiosk-remote-code{font-variant-numeric:tabular-nums;letter-spacing:.06em;white-space:nowrap}
+.remote-pairing h2{margin:0;font-size:22px}.remote-pairing{margin-top:20px}
+.remote-pairing input{width:100%;font-size:24px;letter-spacing:.12em;font-variant-numeric:tabular-nums}
+.remote-pairing form{margin:0}.remote-scanner{display:grid;gap:12px}
+.remote-scanner video{width:100%;max-height:50vh;background:#000;border-radius:var(--ev-card-radius,16px)}
+.remote-scanner p{margin:0}.remote-controller .edu-admin__hint{line-height:1.5}
+

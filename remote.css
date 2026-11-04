@@ -1,5 +1,6 @@
 /* Kiosk-specific composition; colors and controls are shared design tokens. */
  .kiosk-remote-pair{display:grid;justify-items:center;align-content:center;gap:4px;margin-left:clamp(8px,1vmin,24px);padding-left:clamp(8px,1vmin,24px);border-left:1px solid currentColor;flex:0 1 auto;min-width:0;max-width:26%;max-height:100%}
+.kiosk-remote-pair[hidden]{display:none}
 .kiosk-remote-pair img{display:block;background:#fff;width:112px;height:112px;aspect-ratio:1;max-width:100%;border-radius:4px}
 .kiosk-remote-pair img[hidden],.kiosk-remote-pair button[hidden]{display:none}
 .kiosk-remote-pair>div{display:grid;gap:4px;text-align:center;font-size:clamp(10px,.9vmin,20px);line-height:1.2}

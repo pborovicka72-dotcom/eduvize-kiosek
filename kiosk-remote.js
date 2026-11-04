@@ -4,10 +4,20 @@
  const adapter=window.EduvizeKioskRemoteAdapter,R=window.EduvizeRemote;
  if(started||!adapter||!R)return;
  started=true;
- if(!adapter.enabled())return;
+ const preview=adapter.preview?.()===true;
+ if(!preview&&!adapter.enabled())return;
  const host=document.createElement('div');host.className='kiosk-remote-pair';host.setAttribute('aria-label','Ovládání telefonem');
  const image=document.createElement('img');image.alt='QR kód pro ovládání této obrazovky telefonem';image.hidden=true;
  const details=document.createElement('div'),title=document.createElement('strong'),status=document.createElement('span'),disconnect=document.createElement('button');title.textContent='Ovládat telefonem';status.setAttribute('role','status');disconnect.className='edu-admin__button edu-admin__button--secondary';disconnect.textContent='Odpojit telefon';disconnect.hidden=true;details.append(title,status,disconnect);host.append(image,details);const panel=document.getElementById('statusPanel');panel.append(host);new ResizeObserver(()=>{const h=panel.clientHeight;if(h>0){const size=Math.max(40,Math.min(180,h-56,panel.clientWidth*.22));image.style.height=size+'px';image.style.width=size+'px';}}).observe(panel);
+ if(preview){
+ host.classList.add('kiosk-remote-pair--preview');
+ image.src='remote-preview.svg';image.alt='Ukázka QR kódu; párování telefonu je dostupné až ve výstupu.';
+ title.textContent='Ukázka QR kódu';
+ const syncPreview=()=>{host.hidden=adapter.previewEnabled?.()===false;image.hidden=host.hidden;};
+ window.addEventListener('eduvize-kiosk-remote-update',syncPreview);
+ syncPreview();
+ return; // No pairing session or transport requests from the admin preview.
+ }
  let session=null,ack=0,pair='',blobUrl='',stopped=false,failures=0;
  const snapshot=()=>{const value=adapter.snapshot();return {...value,revision:R.revision(value.items)};};
  async function refreshQR(value){const blob=await R.request('/sessions/'+session.id+'/qr',session.owner);if(blobUrl)URL.revokeObjectURL(blobUrl);blobUrl=URL.createObjectURL(blob);image.src=blobUrl;image.hidden=false;pair=value;}

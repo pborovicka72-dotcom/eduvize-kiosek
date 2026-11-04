@@ -1,7 +1,7 @@
 /* Shared application routing for the kiosk and its configuration previews. */
 (function (root) {
   'use strict';
-  const version = '20261104-kiosk-viewport-3';
+  const version = '20261104-transport-settings-1';
   const urls = Object.freeze({
     gallery:'https://pborovicka72-dotcom.github.io/eduvize-styly/fotogalerie/index.html',
     'school-calendar':'https://pborovicka72-dotcom.github.io/eduvize-styly/experimental/school-calendar/',
@@ -114,6 +114,7 @@
       url.searchParams.set('viewMode', 'kiosk');url.searchParams.set('interaction','interactive');
       url.searchParams.set('output', 'kiosk');
       url.searchParams.set('eduvize_ui_version', version);
+      if(app==='transport'&&!url.searchParams.has('stops')&&!url.searchParams.has('name'))url.searchParams.set('transport_settings','browser');
       if (app === 'news') url.searchParams.set('display', '1');
     }
     return url;

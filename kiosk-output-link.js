@@ -10,6 +10,7 @@
   let binary='';for(const byte of bytes)binary+=String.fromCharCode(byte);
   u.searchParams.set('configz',btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''));
   if(profileId)u.searchParams.set('edu-profile',profileId);
+  u.searchParams.set('v','20261104-output-links-3');
   u.searchParams.set('viewMode',mode);
   if(mode==='nsp'){
    u.searchParams.set('output','nsp');

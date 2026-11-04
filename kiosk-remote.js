@@ -1,5 +1,10 @@
 (function(){
- const adapter=window.EduvizeKioskRemoteAdapter,R=window.EduvizeRemote;if(!adapter?.enabled())return;
+ let started=false;
+ function start(){
+ const adapter=window.EduvizeKioskRemoteAdapter,R=window.EduvizeRemote;
+ if(started||!adapter||!R)return;
+ started=true;
+ if(!adapter.enabled())return;
  const host=document.createElement('div');host.className='kiosk-remote-pair';host.setAttribute('aria-label','Ovládání telefonem');
  const image=document.createElement('img');image.alt='QR kód pro ovládání této obrazovky telefonem';image.hidden=true;
  const details=document.createElement('div'),title=document.createElement('strong'),status=document.createElement('span'),disconnect=document.createElement('button');title.textContent='Ovládat telefonem';status.setAttribute('role','status');disconnect.className='edu-admin__button edu-admin__button--secondary';disconnect.textContent='Odpojit telefon';disconnect.hidden=true;details.append(title,status,disconnect);host.append(image,details);const panel=document.getElementById('statusPanel');panel.append(host);new ResizeObserver(()=>{const h=panel.clientHeight;if(h>0){const size=Math.max(40,Math.min(180,h-56,panel.clientWidth*.22));image.style.height=size+'px';image.style.width=size+'px';}}).observe(panel);
@@ -17,4 +22,7 @@
  }catch(e){failures++;image.hidden=true;status.textContent='Mobilní ovládání není dostupné';if([401,410].includes(e.status)){session=null;pair='';}}
  finally{if(!stopped)setTimeout(tick,Math.min(30000,failures?2000*2**Math.min(failures,4):1500));}}
  window.addEventListener('pagehide',()=>{stopped=true;if(blobUrl)URL.revokeObjectURL(blobUrl);});window.addEventListener('pageshow',e=>{if(e.persisted){stopped=false;tick();}});tick();
+ }
+ window.addEventListener('eduvize-kiosk-ready',start);
+ start();
 })();

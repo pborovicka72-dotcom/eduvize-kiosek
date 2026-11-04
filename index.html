@@ -120,10 +120,19 @@ function attachFrameKeyboard(){
 }
 frame.addEventListener('load',attachFrameKeyboard);
 document.addEventListener('focusin',e=>{if(kbEligible(e.target))kbShow(e.target)});document.addEventListener('pointerdown',e=>{if(kb.classList.contains('visible')&&!kb.contains(e.target)&&!kbEligible(e.target)&&!e.target.closest('#contentFrame'))kbHide()});document.addEventListener('keydown',e=>{if(e.key==='Escape')kbHide()});draw();if(sp.get('preview')==='1'){window.addEventListener('message',event=>{if(event.origin!==location.origin||!event.data||event.data.type!=='eduvize-kiosk-preview'||!event.data.config)return;const next=event.data.config;if(!Array.isArray(next.pages))return;const initialized=previewInitialized;const revision=Number(next.previewRevision)||0;const reset=next.previewReset&&(!previewInitialized||revision!==previewRevision);previewRevision=revision;config=normalizeKioskConfig(next);previewInitialized=true;window.dispatchEvent(new Event('eduvize-kiosk-remote-update'));lastPreviewView='';menuPage=null;config.idleSeconds=0;if(reset){selectedMenuItem=null;history=[];page='home';draw();return;}if(restorePreviewView(next.previewView))return;page=next.previewPage&&next.pages.some(p=>p.id===next.previewPage)?next.previewPage:'home';history=[];$('title').textContent=config.title||'Kiosek';draw(initialized)});window.parent.postMessage({type:'eduvize-kiosk-preview-ready'},location.origin)}
+// Newline displays the actual kiosk inside its canonical segment iframe.
+function remoteOutputSurface(){
+ if(window.EduvizeOutputModes.mode()!=='nsp'||sp.get('ev_inner')==='1')return true;
+ if(!['segment_style','segment_block','orientation','style','block'].some(key=>sp.has(key)))return true;
+ const orientation=sp.get('segment_orientation')||sp.get('orientation')||'landscape';
+ const style=Number(sp.get('segment_style')||sp.get('style')||(sp.get('layout')!=='signage'?sp.get('layout'):1)||1);
+ const block=Number(sp.get('segment_block')||sp.get('block')||1);
+ return !window.EduvizeNSPLayouts.layouts[orientation]?.[style]?.[block-1];
+}
 window.EduvizeKioskRemoteAdapter=Object.freeze({
  preview:()=>PREVIEW&&!embeddedPage,
  previewEnabled:()=>config.remoteControl!==false,
- enabled:()=>config.remoteControl!==false&&!PREVIEW&&!embeddedPage&&window===window.top,
+ enabled:()=>config.remoteControl!==false&&!PREVIEW&&!embeddedPage&&remoteOutputSurface(),
  snapshot:()=>({title:config.title||'Kiosek',items:[{id:'home',label:'Domů',active:page==='home'&&!inFrame},...[...document.querySelectorAll('#tiles button.tile')].filter(b=>!b.disabled).slice(0,80).map((b,i)=>({id:'tile:'+i,label:(b.querySelector('strong')?.textContent||b.textContent).trim().slice(0,100),active:b.classList.contains('active')}))]}),
  activate:id=>{if(id==='home'){$('home').click();activity();return;}const i=Number(id.slice(5));if(!/^tile:\d+$/.test(id)||!Number.isInteger(i))return;const b=[...document.querySelectorAll('#tiles button.tile')].filter(b=>!b.disabled)[i];if(b){activity();b.click();}}
 });

@@ -1,6 +1,7 @@
 /* New output links always carry the selected surface and a fresh configuration snapshot. */
 (function(root){
  'use strict';
+ const API='https://eduvize-admin.onrender.com';
  async function url(config,base,profileId){
   const u=new URL('./index.html',base),mode=['web','kiosk'].includes(config.outputType)?config.outputType:'nsp';
   const snapshot=structuredClone(config);
@@ -19,11 +20,28 @@
    u.searchParams.set('block',String(config.layoutBlock||1));
   }
   const output=root.EduvizeOutputModes.url(u,mode);
+  if(output.href.length>1800){
+   const auth=root.EduvizeAdminAuth;await auth?.ready;
+   if(!auth?.getToken('configurations')||!auth.status().schoolId)throw Error('Pro vytvoření krátkého odkazu se přihlaste účtem školy. Nastavení zůstalo uložené v prohlížeči.');
+   const response=await auth.fetch(API+'/api/account/kiosk-outputs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({config:snapshot}),signal:AbortSignal.timeout(90000)},'configurations');
+   const result=await response.json();
+   if(!response.ok||!/^[a-f0-9]{32}$/.test(result.id||''))throw Error(typeof result.detail==='string'?result.detail:'Krátký odkaz se nepodařilo uložit. Zkuste to znovu.');
+   output.searchParams.delete('configz');output.searchParams.set('kiosk_id',result.id);
+  }
   await read(output); // Never copy a link that cannot restore its own snapshot.
   return output;
  }
  async function read(value){
   const u=value instanceof URL?value:new URL(value),compressed=u.searchParams.get('configz');
+  const id=u.searchParams.get('kiosk_id');
+  if(id){
+   if(!/^[a-f0-9]{32}$/.test(id))throw Error('Identifikátor konfigurace není platný.');
+   let result,response;
+   try{response=await fetch(API+'/api/public/kiosk-outputs/'+id,{cache:'no-store',signal:AbortSignal.timeout(90000)});result=await response.json();}
+   catch{throw Error('Uloženou konfiguraci nyní nelze načíst. Zkontrolujte připojení a zkuste stránku obnovit.');}
+   if(!response.ok||!result.config||!Array.isArray(result.config.pages)||!result.config.pages.some(p=>p?.id==='home'))throw Error(typeof result.detail==='string'?result.detail:'Uložená konfigurace není dostupná.');
+   return result.config;
+  }
   const legacy=u.searchParams.get('config')||new URLSearchParams(u.hash.slice(1)).get('config');
   if(!compressed&&!legacy)return null;
   try{

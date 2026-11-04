@@ -48,3 +48,10 @@ Horní náhled je zdrojem aktuálního pohledu pro náhled segmentu. Při změn�
 
 ## Zdroje aktualit v menu
 U tlačítka Aplikace Eduvize → Aktuality školy vyberte Zdroj aktualit. Seznam se načítá z nastavení Aktualit uloženého na OneDrive ve stejném profilu; tlačítko Obnovit zdroje aktualit z profilu načte změny. Bez přihlášení lze zadat vlastní web či RSS přímo. Každé tlačítko uchovává vlastní adresu, metodu a filtr v appUrl, které přežijí uložení, export JSON i sdílený odkaz. Pozdější úprava zdroje v Aktualitách již přiřazené tlačítko nepřepíše; pro převzetí změn zdroj znovu vyberte.
+
+
+### Trvalé krátké odkazy pro Newline
+
+Adresy delší než 1 800 znaků se při kopírování po přihlášení školy uloží jako neměnný výstupní snímek do společné administrace. Veřejná adresa kiosku pak obsahuje `kiosk_id` a běžné parametry režimu/segmentu, nikoli komprimovanou konfiguraci. Identifikátor je náhodný, nezávislý pro každou školu; znalost veřejného odkazu umožňuje pouze čtení daného snímku. Zápis vyžaduje ověřený účet školy. Nový obsah vytváří nový snímek a staré odkazy se nepřepisují ani automaticky nemažou. Tabulka `eduvize_kiosk_outputs_v1` patří k trvalým datům společné administrace a musí zůstat zachovaná při migracích/obnově databáze.
+
+Pojmenované soukromé zálohy na OneDrive zůstávají oddělené. Čtení historických parametrů `configz`, `config` a `#config` zůstává podporované. Neúplné údaje se nikdy nedoplňují jiným místním nastavením. Test: `node tests/output-link-compatibility.test.mjs`.

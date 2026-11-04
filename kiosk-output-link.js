@@ -18,7 +18,24 @@
    u.searchParams.set('style',String(config.layoutStyle||1));
    u.searchParams.set('block',String(config.layoutBlock||1));
   }
-  return root.EduvizeOutputModes.url(u,mode);
+  const output=root.EduvizeOutputModes.url(u,mode);
+  await read(output); // Never copy a link that cannot restore its own snapshot.
+  return output;
  }
- root.EduvizeKioskOutputLink=Object.freeze({url});
+ async function read(value){
+  const u=value instanceof URL?value:new URL(value),compressed=u.searchParams.get('configz');
+  const legacy=u.searchParams.get('config')||new URLSearchParams(u.hash.slice(1)).get('config');
+  if(!compressed&&!legacy)return null;
+  try{
+   const encoded=compressed||legacy;
+   const bytes=Uint8Array.from(atob(encoded.replace(/-/g,'+').replace(/_/g,'/')),ch=>ch.charCodeAt(0));
+   const raw=compressed?await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).text():new TextDecoder('utf-8',{fatal:true}).decode(bytes);
+   const data=JSON.parse(raw);
+   if(!data||!Array.isArray(data.pages)||!data.pages.some(p=>p?.id==='home'))throw Error('Invalid kiosk snapshot');
+   return data;
+  }catch(cause){
+   throw Error('Odkaz je neúplný nebo poškozený. Použijte jeho úplnou původní adresu. Uložená konfigurace se tím nemění.',{cause});
+  }
+ }
+ root.EduvizeKioskOutputLink=Object.freeze({url,read});
 })(window);

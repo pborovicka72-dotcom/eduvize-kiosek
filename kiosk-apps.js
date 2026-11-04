@@ -1,7 +1,7 @@
 /* Shared application routing for the kiosk and its configuration previews. */
 (function (root) {
   'use strict';
-  const version = '20261103-app-selection-1';
+  const version = '20261104-kiosk-viewport-3';
   const urls = Object.freeze({
     gallery:'https://pborovicka72-dotcom.github.io/eduvize-styly/fotogalerie/index.html',
     'school-calendar':'https://pborovicka72-dotcom.github.io/eduvize-styly/experimental/school-calendar/',

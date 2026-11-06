@@ -22,19 +22,24 @@
   function draw(){
    wipe();const current=pages.get(page);if(!current)throw Error('Unknown kiosk page');
    get('title').textContent=current.title||snapshot.payload.title;menu.replaceChildren();
-   for(const button of current.buttons){
+   const persistent=presentation.mode==='kiosk'&&presentation.kioskLayout==='menu';
+   const menuPage=persistent?pages.get(snapshot.payload.startPage):current;
+   function buttonNode(button){
     const el=node('button',button.label);el.type='button';el.dataset.buttonId=button.id;
+    if(button.type==='page'&&button.pageId===page)el.setAttribute('aria-current','page');
     if(presentation.interaction!=='interactive'){el.disabled=true;el.tabIndex=-1;}
-    el.onclick=()=>{activity();if(button.type==='page'){history.push(page);if(history.length>100)history.shift();page=button.pageId;draw();}
+    el.onclick=()=>{activity();if(button.type==='page'){if(button.pageId===page&&!opened)return;history.push(page);if(history.length>100)history.shift();page=button.pageId;draw();}
      else if(button.type==='media')openMedia(button.mediaId);};
-    menu.append(el);
+    return el;
    }
+   for(const button of menuPage.buttons)menu.append(buttonNode(button));
    for(const section of current.sections){
     const card=node('section');card.className='section';
     if(section.title)card.append(node('h2',section.title));
     if(section.imageMediaId){const img=node('img');img.src=asset(section.imageMediaId,true).url;img.alt=section.title||'';card.append(img);}
     if(section.text)card.append(node('p',section.text));content.append(card);
    }
+   if(persistent&&current!==menuPage&&current.buttons.length){const actions=node('nav');actions.setAttribute('aria-label','Další nabídka');actions.className='child-actions';for(const button of current.buttons)actions.append(buttonNode(button));content.append(actions);}
    const tiles=presentation.mode==='kiosk'&&presentation.kioskLayout==='tiles';
    content.hidden=tiles&&!current.sections.length;nav();
   }

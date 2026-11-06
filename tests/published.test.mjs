@@ -29,6 +29,7 @@ const metrics={header:{height:100,title:34},text:{body:30,title:38,label:25}};
 const f=fixture(),controller=new AbortController();f.view.render(snapshot,metrics,{signal:controller.signal});
 assert.equal(f.ids.kiosk.hidden,false);assert.equal(f.ids.status.hidden,true);assert.equal(f.timers.size,1);
 f.ids.menu.children[0].onclick();assert.equal(f.ids.title.textContent,'O škole');
+assert.equal(f.ids.menu.children[0].attributes['aria-current'],'page','Main menu remains visible in Menu + plocha');
 assert.equal(f.ids.content.children[0].children[0].textContent,'<script>test</script>','Text must never be injected as HTML');
 assert.equal(f.ids.content.querySelectorAll('img')[0].src,snapshot.media[0].url);
 f.ids.back.onclick();assert.equal(f.ids.title.textContent,'Nabídka');

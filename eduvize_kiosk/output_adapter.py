@@ -60,8 +60,17 @@ class Payload(Model):
         if len(json.dumps(self.model_dump(),ensure_ascii=False).encode())>262144:raise ValueError('Kiosk payload exceeds 256 KiB')
         return self
 
+class UnsupportedButton(ValueError):
+    """An explicit pilot limitation; never silently discard legacy/child actions."""
+
 def validate(payload,presentation):
     # Presentation/schema validation and entitlement enforcement belong to the shared registry.
+    if isinstance(payload,dict) and isinstance(payload.get('pages'),list):
+        for page in payload['pages']:
+            if not isinstance(page,dict) or not isinstance(page.get('buttons'),list):continue
+            for button in page['buttons']:
+                if isinstance(button,dict) and button.get('type') in ('app','url','output','child-output'):
+                    raise UnsupportedButton('Vložené aplikace a webové adresy tento testovací pilot zatím nepodporuje. Použijte interní stránku, obrázek nebo PDF.')
     return Payload.model_validate(payload).model_dump()
 
 def prepare(actor,payload,connection):
@@ -86,9 +95,12 @@ def prepare(actor,payload,connection):
     return value,list(entries.values())
 
 def get_output_adapters():
-    from eduvize_admin.output_registry import Adapter
+    from eduvize_admin.output_registry import Adapter, fail
     from eduvize_admin.output_media import read_asset
     import psycopg
     def connect():return psycopg.connect(os.environ['DATABASE_URL'],connect_timeout=10)
-    return {'kiosk':Adapter(validate,'/eduvize-kiosek/published.html',prepare,
+    def checked(payload,presentation):
+        try:return validate(payload,presentation)
+        except UnsupportedButton as error:fail(422,'UNSUPPORTED_KIOSK_BUTTON',str(error))
+    return {'kiosk':Adapter(checked,'/eduvize-kiosek/published.html',prepare,
                             lambda entry,request:read_asset(connect,entry,request))}

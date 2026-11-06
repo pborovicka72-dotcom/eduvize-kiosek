@@ -7,13 +7,14 @@ import tempfile
 import unittest
 import uuid
 from pathlib import Path
+from dataclasses import replace
 from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
 from eduvize_admin.output_registry import OutputRegistry, Actor, Adapter
 from eduvize_admin.output_api import router
 from eduvize_admin.output_media import read_asset
-from eduvize_kiosk.output_adapter import validate, prepare
+from eduvize_kiosk.output_adapter import validate, prepare, get_output_adapters
 
 class Connection:
     def __init__(self,path):
@@ -45,7 +46,7 @@ class KioskOutputs(unittest.TestCase):
         with self.connect() as c:
             c.execute('CREATE TABLE eduvize_cloud_files_v1 (owner TEXT,id TEXT,content BYTEA,mime TEXT,deleted BOOLEAN,folder BOOLEAN)')
             c.execute('INSERT INTO eduvize_cloud_files_v1 VALUES (%s,%s,%s,%s,FALSE,FALSE)',(self.school,self.file,self.raw,'image/png'))
-        self.adapter=Adapter(validate,'/eduvize-kiosek/published.html',prepare,lambda e,r:read_asset(self.connect,e,r))
+        self.adapter=replace(get_output_adapters()['kiosk'],media_response=lambda e,r:read_asset(self.connect,e,r))
         self.denied=False
         def entitlement(school,app):
             from eduvize_admin.output_registry import fail
@@ -124,5 +125,21 @@ class KioskOutputs(unittest.TestCase):
             if mode=='nsp':p['geometry']={'registryId':'nsp-4k','registryVersion':1,'orientation':'landscape','layoutId':2,'segmentId':3}
             if mode=='kiosk':p=self.draft['presentation']
             self.assertEqual(Presentation.model_validate(p).mode,mode)
+
+    def test_unsupported_button_has_clear_error_and_preserves_publication(self):
+        self.publish();draft=copy.deepcopy(self.draft)
+        draft['payload']['pages'][0]['buttons'].append({'id':'app','type':'app','label':'Aplikace','target':'weather'})
+        r=self.call('PUT',f'/api/v1/outputs/{self.id}/draft',{'expectedRevision':1,'draft':draft})
+        self.assertEqual(r.status_code,422);self.assertEqual(r.json()['error']['code'],'UNSUPPORTED_KIOSK_BUTTON')
+        self.assertIn('pilot zatím nepodporuje',r.json()['error']['message'])
+        self.assertEqual(self.public().json()['publishedRevision'],1)
+
+    def test_current_entitlement_checks_cover_mutations_and_public_dependencies(self):
+        self.publish();url=self.public().json()['media'][0]['url'];self.denied=True
+        for path in ['/o/'+self.id,f'/api/public/v1/outputs/{self.id}',f'/api/public/v1/outputs/{self.id}/theme',url]:
+            self.assertEqual(self.client.get(path,follow_redirects=False).status_code,403,path)
+        draft=copy.deepcopy(self.draft)
+        self.assertEqual(self.call('PUT',f'/api/v1/outputs/{self.id}/draft',{'expectedRevision':1,'draft':draft}).status_code,403)
+        self.assertEqual(self.call('POST',f'/api/v1/outputs/{self.id}/publish',{'expectedRevision':1}).status_code,403)
 
 if __name__=='__main__':unittest.main()

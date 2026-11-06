@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: pborovicka72-dotcom/eduvize-styly
-          ref: dada4d9e02b43eb6b4b7db66cbf0b10f1eedb3a2
+          ref: 72a19387158ca63dc7a819438a5e94d4f3462936
           path: .test-design-system
           persist-credentials: false
       - name: Link shared test fixtures

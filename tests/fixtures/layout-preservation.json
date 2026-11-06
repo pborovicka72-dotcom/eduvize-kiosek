@@ -1,0 +1,10 @@
+{
+  "sourceCommit": "0d16473cb4a25be54e36fe97edbb7e249d0beaec",
+  "purpose": "Preserve existing source layout during this task; not a substitute for approved visual acceptance after the gate reopens.",
+  "files": {
+    "config.html": "62ef8dc6d3e5f49e76e4b4d20ffc75b9a35a2bf2",
+    "index.html": "2a1ea848646203538ecddc633af48d8e14dc2002",
+    "published.css": "4a412ee04b2222e86d2bac71b72d3a422a0ec195",
+    "published.html": "f64ecaeb0a029e2af20600eb697d92de45dbbee3"
+  }
+}

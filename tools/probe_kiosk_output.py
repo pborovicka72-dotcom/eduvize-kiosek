@@ -8,13 +8,19 @@ import urllib.request
 import uuid
 
 ORIGIN='https://test.skola.eduvize.cz'
+class AccessGateBlocked(RuntimeError):
+    """Policy gate is not an application acceptance result."""
+
 class NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self,*args,**kwargs):return None
 
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument('--revoke-output')
+    parser.add_argument('--execute-live-test',action='store_true',help='Only after the server chat explicitly confirms the test gate and candidate')
     args=parser.parse_args()
+    if not args.execute_live_test:
+        parser.error('Live test is disabled by default. Wait for server confirmation, then explicitly use --execute-live-test. Local/CI tests do not need this flag.')
     token=os.environ['EDUVIZE_TEST_SESSION']
     profile=os.environ['EDUVIZE_TEST_PROFILE_ID']
     if not re.fullmatch('[a-f0-9]{32}',profile):raise SystemExit('Invalid test profile')
@@ -28,8 +34,14 @@ def main():
         try:
             with opener.open(request,timeout=30) as response:status,raw=response.status,response.read()
         except urllib.error.HTTPError as error:status,raw=error.code,error.read()
+        if status in (301,302,303,307,308):
+            raise AccessGateBlocked('Access gate or redirect encountered; redirects are never followed.')
         if status!=expected:raise RuntimeError(f'{method} {path}: expected {expected}, got {status}')
         return json.loads(raw) if raw else None
+    # A closed gate or login HTML must stop the probe before any mutation or credential send.
+    schema=call('GET','/api/v1/outputs/schema',public=True)
+    if not isinstance(schema,dict) or type(schema.get('schemaVersion')) is not int or schema['schemaVersion']!=1 or not isinstance(schema.get('schemas'),dict) or not {'Snapshot','Create'}<=set(schema['schemas']):
+        raise RuntimeError('Expected public output API v1 schema; no mutation has been attempted.')
     if args.revoke_output:
         ident=args.revoke_output
         if not re.fullmatch('[a-f0-9]{32}',ident):raise SystemExit('Invalid output ID')
@@ -60,4 +72,8 @@ def main():
     call('GET','/api/public/v1/outputs/'+ident+'/theme',public=True)
     print(json.dumps({'status':'published-for-browser-test','id':ident,'url':published['url'],'productionChanged':False},ensure_ascii=False))
 
-if __name__=='__main__':main()
+if __name__=='__main__':
+    try:main()
+    except AccessGateBlocked:
+        print(json.dumps({'status':'blocked-by-access-gate','acceptanceVerified':False,'redirectFollowed':False}))
+        raise SystemExit(3)

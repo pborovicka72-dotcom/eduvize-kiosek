@@ -139,7 +139,7 @@ window.EduvizeKioskRemoteAdapter=Object.freeze({
  activate:id=>{if(id==='home'){$('home').click();activity();return;}const i=Number(id.slice(5));if(!/^tile:\d+$/.test(id)||!Number.isInteger(i))return;const b=[...document.querySelectorAll('#tiles button.tile')].filter(b=>!b.disabled)[i];if(b){activity();b.click();}}
 });
 window.dispatchEvent(new Event('eduvize-kiosk-ready'));
-})().catch(error=>{const note=document.createElement('p');note.setAttribute('role','alert');note.textContent=error.message;document.querySelector('main').replaceChildren(note);console.error(error);});</script><script src="remote-client.js?v=20261103-remote-1"></script><script src="kiosk-remote.js?v=20261104-repair-1"></script><script data-edu-theme-first-paint="20261104-design-audit-1">/* Apply only the selected school's cached theme before painting.
+})().catch(error=>{const note=document.createElement('p');note.setAttribute('role','alert');note.textContent=error.message;document.querySelector('main').replaceChildren(note);console.error(error);});</script><script src="remote-client.js?v=20261106-main-login-cookie-1"></script><script src="kiosk-remote.js?v=20261104-repair-1"></script><script data-edu-theme-first-paint="20261104-design-audit-1">/* Apply only the selected school's cached theme before painting.
    A missing cache uses the shared CSS baseline immediately, never a blank page. */
 (function(){
  var key='eduvize-active-theme-v1', map={background:'bg',text:'text',surface:'surface',muted:'muted',primary:'primary',primaryText:'primary-text',secondary:'secondary',secondaryText:'secondary-text',accent:'accent',border:'border'};

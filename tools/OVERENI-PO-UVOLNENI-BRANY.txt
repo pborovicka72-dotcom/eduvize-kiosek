@@ -114,3 +114,5 @@ python -m unittest discover -s tests -p test_payload_validation.py -v
 python -m unittest discover -s tests -p test_probe_kiosk_output.py -v
 Real-registry integrace patří do privátního admin PR14 (SQLite+PG18 s pevnými piny).
 Žádný z těchto lokálních testů neposílá požadavky na testovací ani produkční server.
+
+Bezpečnostní návaznost PR #4: před aktivací navíc splnit tools/KIOSK-URL-SECURITY-HANDOFF.txt (serverová legacy owner kontrola, migrační zpráva, přesné společné kandidáty). Žádná výjimka z brány ani náhrada živé akceptace.

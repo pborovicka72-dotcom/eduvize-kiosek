@@ -15,6 +15,20 @@ jobs:
     if: github.repository_owner == 'pborovicka72-dotcom'
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: kiosk_test
+          POSTGRES_PASSWORD: kiosk_test
+          POSTGRES_DB: kiosk_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kiosk_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # verified v4
         with:
@@ -30,6 +44,24 @@ jobs:
         run: ln -s "$GITHUB_WORKSPACE/.test-design-system" ../eduvize-styly
       - name: Kiosk regression and environment isolation
         run: node --test tests/*.test.mjs tests/*.test.cjs
+      - name: Pinned shared output backend
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: pborovicka72-dotcom/eduvize-admin
+          ref: 162cd485b4b1150a207a7c1c32344b990c2f9933
+          path: .test-output-admin
+          persist-credentials: false
+      - name: Install adapter integration dependencies
+        run: python -m pip install -r .test-output-admin/requirements.txt .
+      - name: Kiosk output HTTP lifecycle and immutable media
+        env:
+          PYTHONPATH: .test-output-admin:.
+        run: python -m unittest discover -s tests -p test_output_adapter.py -v
+      - name: Kiosk output integration on isolated PostgreSQL 18
+        env:
+          PYTHONPATH: .test-output-admin:.
+          OUTPUT_TEST_DATABASE_URL: postgresql://kiosk_test:kiosk_test@127.0.0.1:5432/kiosk_test
+        run: python -m unittest discover -s tests -p test_output_adapter.py -v
   test-deployment:
     needs: verify
     if: github.repository_owner == 'pborovicka72-dotcom' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'

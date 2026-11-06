@@ -83,11 +83,15 @@ class KioskOutputs(unittest.TestCase):
         self.assertEqual(self.client.get('/o/'+self.id,follow_redirects=False).headers['location'],'/eduvize-kiosek/published.html?edu-output='+self.id)
     def test_failed_publication_keeps_previous_and_rolls_back_pins(self):
         first=self.publish();draft=copy.deepcopy(self.draft)
+        with self.connect() as c:c.execute('INSERT INTO eduvize_cloud_files_v1 VALUES (%s,%s,%s,%s,FALSE,FALSE)',(self.school,'new-source',self.raw+b'new','image/png'))
+        draft['payload']['pages'][0]['buttons'].append({'id':'new','type':'media','label':'Nový','fileId':'new-source'})
         draft['payload']['pages'][0]['buttons'].append({'id':'missing','type':'media','label':'Chybí','fileId':'unknown'})
         r=self.call('PUT',f'/api/v1/outputs/{self.id}/draft',{'expectedRevision':1,'draft':draft});self.assertEqual(r.status_code,200,r.text)
         failed=self.call('POST',f'/api/v1/outputs/{self.id}/publish',{'expectedRevision':2});self.assertEqual(failed.status_code,409)
         self.assertEqual(self.public().json()['publishedRevision'],first['publishedRevision'])
         self.assertEqual(self.call('GET',f'/api/v1/outputs/{self.id}/link').json()['url'],first['url'])
+        with self.connect() as c:
+            self.assertEqual(c.execute('SELECT COUNT(*) FROM eduvize_output_assets_v1 WHERE file_id=%s',('new-source',)).fetchone()[0],0,'Failed publication must roll back newly pinned bytes')
     def test_copy_retry_conflict_cross_school_revoke_and_entitlement(self):
         key=str(uuid.uuid4());path=f'/api/v1/outputs/{self.id}/publish';body={'expectedRevision':0}
         pub=self.call('POST',path,body,key).json();self.assertEqual(self.call('POST',path,body,key).json(),pub)

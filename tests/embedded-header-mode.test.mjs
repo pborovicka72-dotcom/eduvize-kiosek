@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
 const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
-const start=html.indexOf('function syncEmbeddedHeader(){'),end=html.indexOf("window.addEventListener('resize',syncEmbeddedHeader)",start);
+const start=html.indexOf("let lastEmbeddedLayout=''"),end=html.indexOf("window.addEventListener('resize',syncEmbeddedHeader)",start);
 assert.ok(start>=0&&end>start);
 for(const outerMode of ['kiosk','nsp']){
  const messages=[];

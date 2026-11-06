@@ -3,23 +3,45 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  pull_request:
+    branches: [main]
 permissions:
   contents: read
-  id-token: write
 concurrency:
   group: eduvize-test-${{ github.repository }}
   cancel-in-progress: false
 jobs:
-  test-deployment:
-    if: github.repository_owner == 'pborovicka72-dotcom' && github.ref == 'refs/heads/main'
+  verify:
+    if: github.repository_owner == 'pborovicka72-dotcom'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # verified v4
         with:
           persist-credentials: false
-      - name: Hosted kiosk routes and document parameters
-        run: node --test tests/hosted-routing.test.mjs
+      - name: Shared design-system fixtures
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: pborovicka72-dotcom/eduvize-styly
+          ref: dada4d9e02b43eb6b4b7db66cbf0b10f1eedb3a2
+          path: .test-design-system
+          persist-credentials: false
+      - name: Link shared test fixtures
+        run: ln -s "$GITHUB_WORKSPACE/.test-design-system" ../eduvize-styly
+      - name: Kiosk regression and environment isolation
+        run: node --test tests/*.test.mjs tests/*.test.cjs
+  test-deployment:
+    needs: verify
+    if: github.repository_owner == 'pborovicka72-dotcom' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    permissions:
+      contents: read
+      id-token: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
       - name: Package tracked source without private credentials
         run: git archive --format=tar.gz HEAD -o "$RUNNER_TEMP/source.tar.gz"
       - name: Authenticate using short-lived GitHub identity and deploy test

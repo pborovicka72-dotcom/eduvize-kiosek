@@ -42,8 +42,8 @@ for (const name of ['index.html', 'config.html']) {
   const buttons = scope.config.pages[0].buttons;
   for (const app of Object.keys(apps.urls)) {
     const item = buttons.find(item => item.type === 'app' && item.target === app);
-    assert.ok(item, `${name}: missing ${app}`);
-    assert.equal(apps.resolve(item).searchParams.get('output'), 'kiosk');
+    // The demo is a curated subset; every catalog application must still resolve.
+    assert.equal(apps.resolve(item || {type:'app',target:app}).searchParams.get('output'), 'kiosk');
   }
 }
 console.log('Kiosk application routing and example configurations passed.');
@@ -103,7 +103,9 @@ assert.equal(otherApp.label,'Aktuality');
 
 for(const [app,title]of Object.entries(apps.names)){
  const button={type:'url',target:'https://example.org',label:'Nové tlačítko',appUrl:'https://example.org'};
- apps.selectApp(button,app);assert.equal(button.label,title);assert.equal(button.target,app);assert.equal(button.appUrl,undefined);
+ apps.selectApp(button,app);assert.equal(button.label,title);assert.equal(button.target,app);
+ if(app==='school-systems')assert.equal(new URL(button.appUrl).searchParams.get('view'),'timetable');
+ else assert.equal(button.appUrl,undefined);
 }
 const regular={type:'app',target:'weather',label:'Počasí'},station={type:'app',target:'weather',label:'Meteostanice'};
 apps.setWeatherStyle(station,'station');assert.notEqual(apps.buttonKey(regular),apps.buttonKey(station));

@@ -1,10 +1,10 @@
 /* Shared application routing for the kiosk and its configuration previews. */
 (function (root) {
   'use strict';
-  const version = '20261104-weather-settings-1';
+  const version = '20261106-school-calendar-1';
   const urls = Object.freeze({
     gallery:'https://pborovicka72-dotcom.github.io/eduvize-styly/fotogalerie/index.html',
-    'school-calendar':'https://pborovicka72-dotcom.github.io/eduvize-styly/experimental/school-calendar/',
+    'school-calendar':new URL('/eduvize-skolni-kalendar/',root.location?.origin||'https://skola.eduvize.cz').href,
     'day-progress':'https://eduvize-prubeh-dne.onrender.com/index.html',
     menu: 'https://eduvize-jidelnicek.onrender.com/index.html?canteen=11592',
     'school-systems': 'https://eduvize-skolni-systemy.onrender.com/index.html',
@@ -50,7 +50,7 @@
     const url=identify(item.appUrl)==='weather'?new URL(item.appUrl):new URL(urls.weather);
     url.searchParams.set(weatherStyle(item)==='station'?'station_text':'text',enabled?'on':'off');item.appUrl=url.href;
   }
-  const paths = {gallery:'eduvize-styly/fotogalerie','school-calendar':'eduvize-styly/experimental/school-calendar',holidays: 'eduvize-svatky', transport: 'eduvize-jizdni-rady',
+  const paths = {gallery:'eduvize-styly/fotogalerie','school-calendar':'eduvize-skolni-kalendar',holidays: 'eduvize-svatky', transport: 'eduvize-jizdni-rady',
     wisdom: 'eduvize-moudrost-dne', documents: 'eduvize-dokumenty', news: 'eduvize-aktuality'};
   const hosts = {'day-progress':'eduvize-prubeh-dne.onrender.com',menu:'eduvize-jidelnicek.onrender.com','school-systems': 'eduvize-skolni-systemy.onrender.com', weather: 'eduvize-weather.onrender.com', documents: 'eduvize-dokumenty-api.onrender.com',
     news: 'eduvize-aktuality.onrender.com'};
@@ -61,7 +61,7 @@
     if (['127.0.0.1','localhost'].includes(url.hostname) && url.port === '8790') return 'menu';
     const hosted=root.EduvizeLinkContract?.identify(url);if(hosted&&Object.hasOwn(urls,hosted))return hosted;
     if(['skola.eduvize.cz','test.skola.eduvize.cz'].includes(url.hostname)&&url.protocol==='https:'&&!url.port){
-      const migrated={'/pocasi':'weather','/aktuality':'news','/jidelnicek':'menu','/skolni-systemy':'school-systems','/prubeh-dne':'day-progress','/display':'documents','/eduvize-dokumenty':'documents','/eduvize-jizdni-rady':'transport','/eduvize-moudrost-dne':'wisdom','/eduvize-svatky':'holidays','/eduvize-styly/fotogalerie':'gallery','/eduvize-styly/experimental/school-calendar':'school-calendar'};
+      const migrated={'/pocasi':'weather','/aktuality':'news','/jidelnicek':'menu','/skolni-systemy':'school-systems','/prubeh-dne':'day-progress','/display':'documents','/eduvize-dokumenty':'documents','/eduvize-jizdni-rady':'transport','/eduvize-moudrost-dne':'wisdom','/eduvize-svatky':'holidays','/eduvize-styly/fotogalerie':'gallery','/eduvize-skolni-kalendar':'school-calendar'};
       for(const [path,app] of Object.entries(migrated))if(url.pathname===path||url.pathname.startsWith(path+'/'))return app;
     }
     for (const [app, path] of Object.entries(paths)) {

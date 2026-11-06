@@ -18,6 +18,8 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # verified v4
         with:
           persist-credentials: false
+      - name: Hosted kiosk routes and document parameters
+        run: node --test tests/hosted-routing.test.mjs
       - name: Package tracked source without private credentials
         run: git archive --format=tar.gz HEAD -o "$RUNNER_TEMP/source.tar.gz"
       - name: Authenticate using short-lived GitHub identity and deploy test

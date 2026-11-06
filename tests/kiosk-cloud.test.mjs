@@ -5,6 +5,8 @@ const context={window:{},URL,calls:[],ok:true};
 let sessionToken='';
 context.fetch=async(url,options)=>{context.calls.push({url,options});return {ok:context.ok,status:401,json:async()=>context.result};};
 context.window.EduvizeAdminAuth={ready:Promise.resolve(),getToken:scope=>{assert.equal(scope,'documents');return sessionToken;},need:()=> 'Přihlaste se ve správě aplikací.',fetch:async(url,options,scope)=>{assert.equal(scope,'documents');return context.fetch(url,{...options,headers:{...options.headers,Authorization:'Bearer '+sessionToken}});}};
+context.window.location={origin:'https://test.skola.eduvize.cz'};
+vm.runInNewContext(fs.readFileSync(new URL('../kiosk-environment.js',import.meta.url),'utf8'),context);
 vm.runInNewContext(fs.readFileSync(new URL('../kiosk-config-file.js',import.meta.url),'utf8'),context);
 vm.runInNewContext(fs.readFileSync(new URL('../kiosk-cloud.js',import.meta.url),'utf8'),context);
 const client=context.window.EduvizeKioskCloud.client;

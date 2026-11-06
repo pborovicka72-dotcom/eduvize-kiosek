@@ -1,6 +1,6 @@
 /* OneDrive uses the Documents service and its in-memory administrator credential. */
 (function(root){
-  const base='https://eduvize-dokumenty-api.onrender.com/api/admin/kiosk-configurations';
+  const base=root.EduvizeKioskEnvironment.url('/api/admin/kiosk-configurations');
   function name(value){if(!/^[a-zA-Z0-9_-]{1,64}$/.test(value))throw Error('Použijte 1–64 písmen bez diakritiky, číslic, pomlček nebo podtržítek.');return value;}
   async function request(method,path,token,body){
     await root.EduvizeAdminAuth.ready;if(!root.EduvizeAdminAuth.getToken('documents'))throw Error(root.EduvizeAdminAuth.need('documents'));

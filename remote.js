@@ -27,7 +27,7 @@
  }
  async function loadDecoder(){
   if(window.jsQR)return window.jsQR;
-  return new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='vendor/jsQR.js?v=1.4.0';script.onload=()=>window.jsQR?resolve(window.jsQR):reject(Error('Čtečka QR se nenačetla. Použijte párovací kód.'));script.onerror=()=>{script.remove();reject(Error('Čtečka QR se nenačetla. Použijte párovací kód.'));};document.head.append(script);});
+  return new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='qr-reader.js?v=1.4.0';script.onload=()=>window.jsQR?resolve(window.jsQR):reject(Error('Čtečka QR se nenačetla. Použijte párovací kód.'));script.onerror=()=>{script.remove();reject(Error('Čtečka QR se nenačetla. Použijte párovací kód.'));};document.head.append(script);});
  }
  $('scan').onclick=async()=>{
   if(scanning||busy)return;

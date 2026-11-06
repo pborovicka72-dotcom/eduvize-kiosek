@@ -1,6 +1,6 @@
 /* Uses the existing Documents/OneDrive service. Never stores credentials in config. */
 (function(root){
-  const base='https://eduvize-dokumenty-api.onrender.com';
+  const base=root.EduvizeKioskEnvironment.origin;
   const token=()=>root.EduvizeAdminAuth.getToken('documents');let documents=[];let categories=['Ostatní'];const views=new Set();let pending;
   async function refresh(includeCloud=true){
     if(!pending)pending=(async()=>{

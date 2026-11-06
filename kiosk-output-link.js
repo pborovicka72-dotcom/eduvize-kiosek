@@ -1,7 +1,7 @@
 /* New output links always carry the selected surface and a fresh configuration snapshot. */
 (function(root){
  'use strict';
- const API='https://eduvize-admin.onrender.com';
+ const API=root.EduvizeKioskEnvironment.origin;
  async function url(config,base,profileId){
   const u=new URL('./index.html',base),mode=['web','kiosk'].includes(config.outputType)?config.outputType:'nsp';
   const snapshot=structuredClone(config);

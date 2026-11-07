@@ -20,3 +20,10 @@ let resolve,started;const requested=new Promise(r=>started=r);f.root.EduvizeProf
 const missing=fixture();missing.setId('');assert.equal(await missing.api.loadBundle(),null);assert.equal(missing.calls.length,0);
 assert.equal(f.api.applyTransport(config,{source:'cz_gtfs',stops:[]}),false);assert.equal(f.api.applyTransport(config,{source:'unknown',stops:['Stop']}),false);
 console.log('Linked settings: asynchronous dependency, exact profile request, stale-profile rejection, school transport snapshot and per-button options passed.');
+
+const schoolConfig={school:{motto:'Vlastní motto',description:'Vlastní text',photo:'https://example.org/photo.png'}};
+const identity={schemaVersion:1,data:{name:'Škola z aktivního profilu',address:'Školní 1',ico:'12345678',municipality:'Obec',director:'Unsupported card field'}};
+const beforeSchool=JSON.stringify(schoolConfig),projected=f.api.projectSchool(schoolConfig,identity);
+assert.equal(JSON.stringify(schoolConfig),beforeSchool,'inherited metadata must never be written into the draft');assert.equal(projected.school.name,identity.data.name);assert.equal(projected.school.address,identity.data.address);assert.equal(projected.school.ico,'12345678');assert.equal(projected.school.motto,'Vlastní motto');assert.equal(projected.school.description,'Vlastní text');assert.equal(projected.school.photo,'https://example.org/photo.png');assert.equal(projected.school.director,undefined);
+const explicit={school:{name:'Vlastní škola',address:'',ico:''}};assert.equal(f.api.projectSchool(explicit,identity),explicit,'custom values and explicitly cleared fields must remain untouched');assert.equal(f.api.projectSchool(schoolConfig,null),schoolConfig);assert.equal(f.api.projectSchool(schoolConfig,{schemaVersion:2,data:{name:'Other'}}),schoolConfig);
+console.log('School preview/share projection inherits only absent name/address/ICO; draft, explicit clears and authored content stay unchanged.');

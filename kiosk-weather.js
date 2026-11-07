@@ -34,6 +34,21 @@
   }
   return changed;
  }
+ function projectSchool(config,identity){
+  // Inherited card values belong only to the preview/shared snapshot, not the draft.
+  // An existing empty field is an explicit clear and must never be restored automatically.
+  if(identity?.schemaVersion!==1||!identity.data||typeof identity.data!=='object'||Array.isArray(identity.data))return config;
+  const updates={};
+  for(const key of ['name','address','ico']){
+   if(Object.prototype.hasOwnProperty.call(config.school||{},key))continue;
+   const value=identity.data[key];
+   if(typeof value!=='string'||!value.trim())continue;
+   if(key==='ico'&&!/^[0-9]{8}$/.test(value.trim()))continue;
+   if(key!=='ico'&&value.length>300)continue;
+   updates[key]=value.trim();
+  }
+  return Object.keys(updates).length?{...config,school:{...(config.school||{}),...updates}}:config;
+ }
  async function loadBundle(){
   await root.EduvizeAdminAuth?.ready;
   // The shared profile script is loaded asynchronously by the common toolbar.
@@ -47,7 +62,7 @@
   const id=root.EduvizeAdminAuth?.status().profileId;if(!id)return null;
   const p=await root.EduvizeProfiles.request('/'+id,{fresh:true});
   if(root.EduvizeAdminAuth?.status().profileId!==id)return null;
-  return {profileId:id,weather:p.apps?.weather?.config||null,transport:p.apps?.transport?.config||null};
+  return {profileId:id,weather:p.apps?.weather?.config||null,transport:p.apps?.transport?.config||null,school:p.apps?.['school-identity']?.config||null};
  }
  async function load(){return (await loadBundle())?.weather||null;}
  function weatherCaption(item,weather){
@@ -60,5 +75,5 @@
   if(mode!=='profile'&&mode!=='browser'&&['stops','name'].some(k=>u.searchParams.has(k)))return 'Vlastní zastávky tlačítka: '+(u.searchParams.get('stops')||u.searchParams.get('name')).split('|').join(', ');
   return transport?.stops?.length?'Zastávky z nastavení dopravy školy: '+transport.stops.join(', '):'Nastavení dopravy tohoto profilu zatím není načtené.';
  }
- root.EduvizeKioskWeather=Object.freeze({apply,applyTransport,load,loadBundle,weatherCaption,transportCaption});
+ root.EduvizeKioskWeather=Object.freeze({apply,applyTransport,projectSchool,load,loadBundle,weatherCaption,transportCaption});
 })(window);

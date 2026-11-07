@@ -1,0 +1,29 @@
+import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:assert/strict';
+const source=fs.readFileSync(new URL('../kiosk-weather.js',import.meta.url),'utf8');
+const A='a'.repeat(32),B='b'.repeat(32);
+function fixture(){let id=A,now=0,ticks=0;const calls=[];const root={EduvizeAdminAuth:{ready:Promise.resolve(),status:()=>({profileId:id})},EduvizeKioskApps:{urls:{weather:'https://test.skola.eduvize.cz/pocasi/display',transport:'https://test.skola.eduvize.cz/eduvize-jizdni-rady/index.html'}}};
+ const profile={apps:{weather:{config:{values:{'setting-place':'Horní Údolí','setting-lat':'50.2','setting-lon':'17.3','setting-source':'meteogram','setting-text-forecast':false}}},transport:{config:{source:'cz_gtfs',stops:['První zastávka','Druhá zastávka'],types:['bus'],values:{minutes:'45',limit:'12',pageSeconds:'9'}}}}};
+ const api={request:async(path,options)=>{calls.push({path,options});return profile}};
+ vm.runInNewContext(source,{window:root,URL,Date:{now:()=>now},setTimeout:fn=>{ticks++;now+=50;root.EduvizeProfiles=api;queueMicrotask(fn)}});
+ return {root,api:root.EduvizeKioskWeather,profile,calls,get ticks(){return ticks},setId:v=>id=v};}
+const f=fixture();assert.equal(f.root.EduvizeProfiles,undefined);const bundle=await f.api.loadBundle();assert.equal(f.ticks,1,'wait for asynchronous shared profile service, do not silently return null');assert.equal(bundle.profileId,A);assert.equal(f.calls[0].path,'/'+A);assert.equal(f.calls[0].options.fresh,true);
+const linkedWeather={type:'app',target:'weather',appUrl:f.root.EduvizeKioskApps.urls.weather+'?weather_style=station&text=on'};
+const customWeather={type:'app',target:'weather',appUrl:f.root.EduvizeKioskApps.urls.weather+'?misto=Vlastní&lat=49&lon=15'};
+const linkedTransport={type:'app',target:'transport',appUrl:f.root.EduvizeKioskApps.urls.transport+'?transport_settings=browser'};
+const customTransport={type:'app',target:'transport',appUrl:f.root.EduvizeKioskApps.urls.transport+'?stops=Vlastní&source=pid'};
+const config={pages:[{id:'home',buttons:[linkedWeather,customWeather,linkedTransport,customTransport]}]};
+const customBefore=[customWeather.appUrl,customTransport.appUrl];assert(f.api.apply(config,bundle.weather));assert(f.api.applyTransport(config,bundle.transport));
+let w=new URL(linkedWeather.appUrl),t=new URL(linkedTransport.appUrl);assert.equal(w.searchParams.get('misto'),'Horní Údolí');assert.equal(w.searchParams.get('weather_style'),'station');assert.equal(w.searchParams.get('text'),'on','per-button display option remains independent');assert.equal(t.searchParams.get('stops'),'První zastávka|Druhá zastávka');assert.equal(t.searchParams.get('source'),'cz_gtfs');assert.equal(t.searchParams.get('minutes'),'45');assert.equal(t.searchParams.get('transport_settings'),'profile','linked transport must not depend on another browser localStorage');assert.deepEqual([customWeather.appUrl,customTransport.appUrl],customBefore,'explicit per-button settings are preserved');
+assert.match(f.api.weatherCaption(customWeather,bundle.weather),/Vlastní/);assert(!f.api.weatherCaption(customWeather,bundle.weather).includes('Horní Údolí'));assert.match(f.api.transportCaption(linkedTransport,bundle.transport),/První zastávka/);
+assert.equal(f.api.apply(config,bundle.weather),false);assert.equal(f.api.applyTransport(config,bundle.transport),false,'stable settings do not mutate repeatedly');
+let resolve,started;const requested=new Promise(r=>started=r);f.root.EduvizeProfiles={request:()=>{started();return new Promise(r=>resolve=r)}};const pending=f.api.loadBundle();await requested;f.setId(B);resolve(f.profile);assert.equal(await pending,null,'do not return school A settings after switching to school B');
+const missing=fixture();missing.setId('');assert.equal(await missing.api.loadBundle(),null);assert.equal(missing.calls.length,0);
+assert.equal(f.api.applyTransport(config,{source:'cz_gtfs',stops:[]}),false);assert.equal(f.api.applyTransport(config,{source:'unknown',stops:['Stop']}),false);
+console.log('Linked settings: asynchronous dependency, exact profile request, stale-profile rejection, school transport snapshot and per-button options passed.');
+
+const schoolConfig={school:{motto:'Vlastní motto',description:'Vlastní text',photo:'https://example.org/photo.png'}};
+const identity={schemaVersion:1,data:{name:'Škola z aktivního profilu',address:'Školní 1',ico:'12345678',municipality:'Obec',director:'Unsupported card field'}};
+const beforeSchool=JSON.stringify(schoolConfig),projected=f.api.projectSchool(schoolConfig,identity);
+assert.equal(JSON.stringify(schoolConfig),beforeSchool,'inherited metadata must never be written into the draft');assert.equal(projected.school.name,identity.data.name);assert.equal(projected.school.address,identity.data.address);assert.equal(projected.school.ico,'12345678');assert.equal(projected.school.motto,'Vlastní motto');assert.equal(projected.school.description,'Vlastní text');assert.equal(projected.school.photo,'https://example.org/photo.png');assert.equal(projected.school.director,undefined);
+const explicit={school:{name:'Vlastní škola',address:'',ico:''}};assert.equal(f.api.projectSchool(explicit,identity),explicit,'custom values and explicitly cleared fields must remain untouched');assert.equal(f.api.projectSchool(schoolConfig,null),schoolConfig);assert.equal(f.api.projectSchool(schoolConfig,{schemaVersion:2,data:{name:'Other'}}),schoolConfig);
+console.log('School preview/share projection inherits only absent name/address/ICO; draft, explicit clears and authored content stay unchanged.');

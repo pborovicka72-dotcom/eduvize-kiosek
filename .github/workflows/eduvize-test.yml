@@ -23,13 +23,18 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: pborovicka72-dotcom/eduvize-styly
-          ref: dada4d9e02b43eb6b4b7db66cbf0b10f1eedb3a2
+          ref: 72a19387158ca63dc7a819438a5e94d4f3462936
           path: .test-design-system
           persist-credentials: false
       - name: Link shared test fixtures
         run: ln -s "$GITHUB_WORKSPACE/.test-design-system" ../eduvize-styly
       - name: Kiosk regression and environment isolation
         run: node --test tests/*.test.mjs tests/*.test.cjs
+      - name: Kiosk payload validation
+        run: |
+          python -m pip install .
+          python -m unittest discover -s tests -p test_payload_validation.py -v
+          python -m unittest discover -s tests -p test_probe_kiosk_output.py -v
   test-deployment:
     needs: verify
     if: github.repository_owner == 'pborovicka72-dotcom' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'

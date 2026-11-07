@@ -14,6 +14,7 @@ const p=fixture(true);
 assert.equal(p.nodes.length,1);const host=p.nodes[0],img=host.children[0];
 assert.equal(img.src,'remote-preview.svg');assert.equal(img.hidden,false);
 assert.match(img.alt,/Ukázka/);assert.equal(p.calls,0);
+const previewDetails=host.children[1];assert.match(previewDetails.children[0].textContent,/ukázka/);assert.match(previewDetails.children[1].textContent,/Ukázkový kód/);assert.match(previewDetails.children[2].textContent,/nejsou aktivní/);assert.match(previewDetails.children[2].textContent,/otevřete výstup/);
 p.toggle(false);assert.equal(host.hidden,true);assert.equal(img.hidden,true);
 p.toggle(true);assert.equal(host.hidden,false);assert.equal(img.hidden,false);assert.equal(p.calls,0);
 assert.equal(fixture(true,false).nodes[0].hidden,true);

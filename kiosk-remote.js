@@ -13,7 +13,7 @@
  if(preview){
  host.classList.add('kiosk-remote-pair--preview');
  image.src='remote-preview.svg';image.alt='Ukázka QR kódu; párování telefonu je dostupné až ve výstupu.';
- title.textContent='Ovládat telefonem';pairCode.textContent='Kód: 1234 5678';pairCode.hidden=false;
+ title.textContent='Ovládat telefonem · ukázka';status.textContent='Náhled: QR a kód nejsou aktivní. Pro spárování telefonu otevřete výstup kiosku.';pairCode.textContent='Ukázkový kód: 1234 5678';pairCode.hidden=false;
  const syncPreview=()=>{host.hidden=adapter.previewEnabled?.()===false;image.hidden=host.hidden;};
  window.addEventListener('eduvize-kiosk-remote-update',syncPreview);
  syncPreview();

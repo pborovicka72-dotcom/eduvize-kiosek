@@ -28,7 +28,9 @@ function fixture(initialBehavior='ok'){
   setTimeout(f,ms){timeouts.set(++sequence,{f,ms});return sequence;},clearTimeout:k=>timeouts.delete(k)};
  clock.fetch=async(url,options)=>{
   state.requests.push({url,options});assert.equal(new URL(url).origin,origin);assert.equal(options.method,'GET');
-  assert.equal(options.credentials,'omit');assert.equal(options.redirect,'error');assert.equal(options.cache,'no-store');
+  // The shared public client sends only the same-origin main-login gate cookie.
+  // It must still reject redirects and never attach a school admin Bearer token.
+  assert.equal(options.credentials,'same-origin');assert.equal(options.redirect,'error');assert.equal(options.cache,'no-store');
   assert.equal('Authorization' in options.headers,false);
   assert.ok([`/api/public/v1/outputs/${id}`,`/api/public/v1/outputs/${id}/theme`].includes(new URL(url).pathname));
   if(state.behavior==='gate')throw new TypeError('Synthetic login redirect blocked');

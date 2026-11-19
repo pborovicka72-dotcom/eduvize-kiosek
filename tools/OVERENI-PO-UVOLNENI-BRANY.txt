@@ -1,0 +1,118 @@
+Kiosek v1 — postup ověření po uvolnění přihlašovací brány
+Příprava 6. 11. 2026. Tento postup není souhlas k nasazení ani doklad živé akceptace.
+
+Nynější stav
+Aktivace, změny přístupové politiky, infrastruktury a nasazování jsou HOLD. Pracujeme
+jen lokálně a v PR CI bez deploy. Nevytvářet výjimku z brány, alternativní resolver,
+cookie bypass ani proxy; neměnit Caddy/nft. Přesměrování na login je záměrná politika,
+nikoli automaticky regrese aplikace. Historické akceptace platí jen pro tehdejší release
+a politiku. Produkční přístupová konfigurace byla mezitím změněna samostatným pokynem
+uživatele; tento úkol žádnou produkční konfiguraci ani aplikaci nemění.
+
+0. Podmínky zahájení — potvrzuje serverový chat
+Zapsat konkrétní potvrzení otevření testovacího okna a přesný rozsah přístupové politiky.
+Samotné obnovení sudo, zelené CI, přihlášení správce nebo přepnutí DNS není uvolnění brány.
+Server vlastní aktivaci a přístupovou politiku. Pokud anonymní /o a scoped snapshot/theme/
+media zůstávají blokované, anonymní akceptace je BLOCKED; neobcházet ji relací správce.
+Tento postup serveru nepovoluje měnit produkci nebo oslabit produkční schvalování.
+
+1. Přesný kandidát a výchozí stav
+Server zaznamená release ID, Git SHA Kiosku/backendu/stylů, image digest a policy verzi.
+Vybrat jen zkontrolované zdroje; nepřeklopit všechno incoming. CI musí odpovídat těmto
+pinům, jinak před nasazením zopakovat izolované integrace. Neměnit gallery checkpoint.
+Před zahájením uchovat výchozí test manifest a stav produkce pro pozdější porovnání.
+Testovací artefakt se nesmí automaticky propagovat do produkce.
+
+2. Profily, školy a data
+Nejprve inventura existujících testovacích škol/profilů a vazeb. Použít vhodný existující
+profil a druhou existující testovací školu pro negativní scénář. Zachovat jasně označený
+výchozí profil i anonymizovaný známý profil; tento postup nezakládá další profily.
+Pokud fixture chybí, její nezbytnost a vazby předem odsouhlasit se serverovým chatem.
+Zapsat účel každé vytvořené testovací sestavy/výstupu a jejich ID; žádná produkční data.
+Testovací relaci předat standardní schválenou cestou, ne přes obcházení brány nebo
+root-only registry. Hesla/tokeny nejsou v repozitáři, argumentech URL, historii ani logu.
+
+3. Zachování rozložení
+Porovnat dotčenou administraci a výstup s dosavadní schválenou výchozí podobou na stejném
+viewportu. Zachovat umístění, pořadí, seskupení a ovládání používaných prvků. Poznamenat
+screenshoty před/po v obou orientacích. Zdrojový layout-preservation test kontroluje,
+že příprava testů neměnila HTML/CSS; nenahrazuje toto vizuální srovnání. Nový statický
+pilot není plná náhrada původního Kiosku. Přihlášení se tímto testem nepředělává.
+
+4. Bezpečný preflight bez zápisu
+Výchozí spuštění tools/probe_kiosk_output.py končí kódem 2 ještě před čtením přístupů
+a vytvořením transportu. Po výslovném serverovém potvrzení se přidává --execute-live-test.
+První požadavek je anonymní GET /api/v1/outputs/schema, bez autorizační hlavičky.
+Musí vrátit skutečné JSON schéma v1. Jakýkoli redirect se nenásleduje; login HTML či
+neplatné schéma nepovolí mutace. Redirect se vykáže jako blocked-by-access-gate, exit3,
+nikoli PASS. Neopakovat pokus s cookies či alternativní adresou.
+
+5. Publikování
+Se serverem připravenou testovací relací a existujícím profilem spustit po potvrzení:
+python tools/probe_kiosk_output.py --execute-live-test
+EDUVIZE_TEST_SESSION a EDUVIZE_TEST_PROFILE_ID dodat mimo logy bezpečným lokálním
+předáním prostředí. Probe používá pouze https://test.skola.eduvize.cz s ověřeným TLS.
+Vytvoří explicitní testovací sestavu a koncept; veřejný koncept404, link409. Publikuje
+jednou, retry se stejným klíčem vrátí stejný výsledek. Opakované GET link nezmění revizi.
+Zkontroluje konkrétní veřejný obsah a theme, vypíše pouze veřejné ID/URL pro browser.
+Zelený HTTP probe není dokladem vykreslení ani zachování rozložení.
+
+6. Přehrávání v čistém prohlížeči
+Otevřít /o/{id} bez administrátorské relace až tehdy, když to potvrzená gate politika
+dovoluje. Ověřit konkrétní publikovaný text, navigaci, Domů/Zpět a automatický návrat.
+Stejný výstup s cizí lokální relací/cache nesmí změnit školu, profil, obsah nebo styl.
+Ověřit všechny kombinace samostatně: web; validní NSP segment na šířku a výšku; Kiosek
+Menu+plocha a Dlaždice, každé na šířku i výšku. Zapsat skutečný logický a fyzický viewport,
+jediné contain škálování, dostupnost hlavičky/ovládání a poměr stran. Display režim
+nesmí poskytovat interaktivní práva. Nepodporovaný segment se nesmí tiše nahradit jiným.
+
+7. Média a styl
+Na syntetických souborech ověřit skutečně dekódovaný JPEG/PNG a PDF v sandboxovaném iframe,
+jejich scoped URL a správnou školu. Netestovat jen status200. Zdroj nahradit/odstranit
+pouze u předem evidované testovací fixture po kontrole vazeb; publikovaná média zůstanou
+stejná do další publikace. Chybná další publikace musí zachovat předchozí revizi i piny.
+Změnit styl použitého test profilu, ověřit automatické načtení na stejné URL bez změny
+obsahu/pozice a beze změny druhého profilu. Původní styl test fixture pak obnovit.
+
+8. Negativní scénáře a změna obsahu
+Z druhé testovací školy odmítnout cizí privátní výstup/sestavu/profil; ověřit serverovou
+licenci při mutaci i resolver/snapshot/theme/media čtení. Bezpečně zneplatnit jen známou
+testovací licence fixture, poté ji obnovit. Nepřijímat app/url/child tlačítka: srozumitelná
+422 UNSUPPORTED_KIOSK_BUTTON, žádné tiché vynechání ani zveřejnění části konfigurace.
+Uložit koncept změny a potvrdit, že běžící výstup je stále starý. Publikovat změnu pod
+stejnou URL; otevřená stránka načte novou revizi a vyčistí předchozí PDF/timery.
+
+9. Odvolání — až po dokončení všech testů aktivního obsahu
+V otevřeném PDF i otevřeném textovém výstupu ponechat prohlížeč běžet. Se serverovým
+chatem potvrdit, že jde o vlastní dočasný výstup a nic dalšího ho nepoužívá. Potom:
+python tools/probe_kiosk_output.py --execute-live-test --revoke-output ID
+Zkontrolovat resolver/snapshot/theme/media410 a automatické vyčištění již otevřené
+stránky nejpozději při následujícím 60s ověření. Menu a obsah zmizí, iframe je odpojený,
+jeho src je about:blank a idle časovač je zastavený. Žádný login, demo, cizí data či stará
+publikace jako náhrada. Ostatní výstupy stejného profilu zůstávají funkční.
+
+10. Restart a nezávislost na Renderu — pouze v potvrzeném testovacím okně
+Server provede koordinovaný restart testovacích služeb a vyprázdnění relevantních cache.
+Blokáda Renderu musí být doložena v klientu i pro serverové odchozí spoje; samotný grep,
+starý cache nebo galerie akceptace nejsou důkaz. Ověřit první načtení, scoped styly,
+média i další polling. Nezasahovat do produkční sítě. Každý netestovaný callback,
+proces, orientaci či cache výslovně označit jako neověřené. Bránu neměnit kvůli testu
+bez samostatného serverového potvrzení.
+
+11. Protokol a úklid
+Každý výsledek: kandidát/policy, datum, testovací fixture, očekávání, skutečnost, PASS/
+FAIL/BLOCKED, důkaz. Uchovat redigované síťové/konzolové záznamy a screenshoty konkrétního
+obsahu; bez tokenů/cookies/privátních kontaktů. Žádné hypotetické PASS za zavřenou branou.
+Se serverem vyhodnotit další potřebu fixture a závislosti sestav/výstupů/profilů/služeb.
+Nemažte profily podle názvu/stáří; aktivní a známé anonymizované profily ponechat.
+Závěrem zaznamenat nezměněnou produkci v rozsahu tohoto úkolu, stav testovací brány,
+obnovu dočasně upraveného stylu/licence a seznam zbývajících omezení.
+
+Lokální CI, které lze spouštět během HOLD
+node --test tests/*.test.mjs tests/*.test.cjs
+python -m unittest discover -s tests -p test_payload_validation.py -v
+python -m unittest discover -s tests -p test_probe_kiosk_output.py -v
+Real-registry integrace patří do privátního admin PR14 (SQLite+PG18 s pevnými piny).
+Žádný z těchto lokálních testů neposílá požadavky na testovací ani produkční server.
+
+Bezpečnostní návaznost PR #4: před aktivací navíc splnit tools/KIOSK-URL-SECURITY-HANDOFF.txt (serverová legacy owner kontrola, migrační zpráva, přesné společné kandidáty). Žádná výjimka z brány ani náhrada živé akceptace.

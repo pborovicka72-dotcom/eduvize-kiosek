@@ -5,7 +5,7 @@ import {Blob} from 'node:buffer';
 import {CompressionStream,DecompressionStream} from 'node:stream/web';
 import {gzipSync} from 'node:zlib';
 const snapshots=new Map();let sequence=0;
-const publicFetch=async(url)=>{const id=url.split('/').at(-1);return new Response(JSON.stringify(snapshots.has(id)?{config:snapshots.get(id)}:{detail:'Odkaz nebyl nalezen'}),{status:snapshots.has(id)?200:404});};
+const publicFetch=async(url)=>{if(url.includes('/validate?'))return new Response(JSON.stringify({valid:true,scope:'configurations',schoolId:'a'.repeat(32),expiresAt:Date.now()/1000+300}));const id=new URL(url).pathname.split('/').at(-1);return new Response(JSON.stringify(snapshots.has(id)?{config:snapshots.get(id)}:{detail:'Odkaz nebyl nalezen'}),{status:snapshots.has(id)?200:404});};
 const auth={ready:Promise.resolve(),getToken:()=> 'test-only',status:()=>({schoolId:'school'}),fetch:async(url,options,scope)=>{assert.equal(scope,'configurations');const id=(++sequence).toString(16).padStart(32,'0');snapshots.set(id,JSON.parse(options.body).config);return new Response(JSON.stringify({id}));}};
 const scope={window:{EduvizeAdminAuth:auth,EduvizeOutputModes:{url:(u)=>{u.searchParams.set('edu-link','1');return u;}}},URL,URLSearchParams,TextEncoder,TextDecoder,Response,Blob,CompressionStream,DecompressionStream,Uint8Array,atob,btoa,structuredClone,AbortSignal,fetch:publicFetch};
 scope.window.location={origin:'https://test.skola.eduvize.cz'};

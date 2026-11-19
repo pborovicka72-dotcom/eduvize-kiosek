@@ -6,15 +6,17 @@ const start=html.indexOf('function resetPreviewToHome()');
 const end=html.indexOf("window.addEventListener('message',e=>",start);
 const sent=[],frame={contentWindow:{postMessage:m=>sent.push(m)}};
 const controls={subtitle:{value:'School'},showInfoPanel:{checked:true},tileCount:{value:'10'},menuPosition:{value:'left'},menuLayout:{value:'menu'},defaultApp:{value:'weather'},'kiosk-output-type':{value:'kiosk'}};
-const context={c:{pages:[{id:'home'},{id:'school'}]},current:'school',
+const context={schoolIdentity:{schemaVersion:1,data:{name:'Sdílená škola',address:'Školní 1',ico:'12345678'}},c:{pages:[{id:'home'},{id:'school'}]},current:'school',
  livePreviewView:{page:'home',inFrame:true,frameUrl:'https://example.org/app'},
  previewLayoutKey:'',previewGeometryKey:'',previewRevision:0,previewResetPending:false,
  segOrientation:'landscape',segStyle:1,segBlock:1,
  kioskSegmentHost:{querySelector:()=>frame},$:id=>controls[id],
  normalizeKioskConfig:x=>x,structuredClone,location:{origin:'https://example.org'},
  window:{EduvizeTileNavigation:{area:v=>({capacity:Number(v)})}}};
+vm.runInNewContext(fs.readFileSync(new URL('../kiosk-weather.js',import.meta.url),'utf8'),{window:context.window,URL});
 vm.runInNewContext(html.slice(start,end),context);
 context.syncPreviewFrame();
+assert.equal(sent.at(-1).config.school.name,'Sdílená škola');assert.equal(context.c.school,undefined,'preview metadata does not enter the editor draft');
 assert.equal(sent.at(-1).config.previewView.frameUrl,'https://example.org/app');
 assert.equal(sent.at(-1).config.previewReset,undefined);
 controls.menuLayout.value='tiles';

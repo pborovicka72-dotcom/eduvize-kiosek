@@ -1,0 +1,15 @@
+KIOSEK – URL OCHRANA PRO PR #4, POUZE SOURCE/CI
+
+Odsouhlaseno bezpečnostním chatem 6. 11. 2026, podklad Eduvize IT/security/audit-20261106/handoff/kiosk-url-security-v1/manifest.json. Starší kompilované soubory nejsou náhradou současného PR stromu.
+
+Legacy kiosk-output-link.js: každý hostovaný nový odkaz uloží immutable snapshot se školní autorizací bez ohledu na délku. Staré configz/config/#config i prázdný vstup vyžadují živé ověření konfigurací školy; anonymně bez localStorage/default fallbacku. Duplicity a kombinace včetně prázdných parametrů odmítnout před transportem. kiosk_id nelze kombinovat s preview nebo inline konfigurací. Vývoj na loopback zachován.
+
+Preview: nejvýše čtyři same-origin ancestors; první nalezenou autoritu ověřit scope configurations, expiresAt a schoolId32hex. Cizí/nedostupná autorita, chybějící nebo zrušený token selže zavřeně. Token jen v paměti a Authorization na stejném API prostředí, credentials omit, redirect error. Zprávy přijímat pouze ze stejného originu a source===parent. Žádná nová identita/scope pro obrazovky v tomto PR.
+
+Vložená publikovaná podstránka dědí přesně kiosk_id a edu-profile, bez config/configz/hash/preview; vybrat může pouze existující stránku snímku. Ovládání Zpět, menu, pořadí prvků, HTML/CSS zachováno. Nový v1 published renderer/adapter zůstává nezměněný a při selhání nikdy nesmí přepnout do legacy.
+
+NEZBYTNÉ PŘED AKTIVACÍ (nikoli splněné tímto PR):
+1. Server musí převzít kompatibilní legacy kiosk_outputs.py profile→school owner kontrolu z bezpečnostního chatu a potvrdit exact otestovaný admin head. Klientský profil není autorita a tyto mock testy nenahrazují serverovou izolaci škol.
+2. Migrační zpráva pouze v administraci přes existující sdílený mechanismus oznámení: staré configz/config/#config se anonymně neotevřou; přihlásit školu, obnovit původní konfiguraci, ověřit náhled a vytvořit nový odkaz. Původní odkazy, zálohy a data zachovat. Vlastník sdílené zprávy bezpečnostní/strategický chat; bez oznámení neaktivovat nekompatibilní změnu.
+3. Samostatná display read-only/revocable identita a shared 401 client/runtime mají jiné vlastníky; jejich schválené kandidáty začlenit do společného vydání. Neobcházet gate ani převzít admin token na obrazovku.
+4. Explicitní potvrzení serverového chatu pro testovací okno, přesný manifest a přístupy. Poté tools/OVERENI-PO-UVOLNENI-BRANY.txt + živé testy dvou škol, tamper URL/profile/kiosk_id, preview/public embedded menu→podstránka→zpět, oba směry a browser screenshot proti schválené podobě. CI není live acceptance. Produkci tímto úkolem neměnit.

@@ -13,7 +13,9 @@ for(const origin of ['https://test.skola.eduvize.cz','https://skola.eduvize.cz',
  vm.runInNewContext(read('remote-client.js'),context);
  await context.window.EduvizeRemote.request('/join-code',null,{code:'12345678'});
  assert.equal(calls[0].url,origin+'/api/kiosk-remote/join-code');
- assert.equal(calls[0].options.credentials,'omit');
+ // The gate cookie is same-origin only; remote capabilities remain separate.
+ assert.equal(calls[0].options.credentials,'same-origin');
+ assert.equal(calls[0].options.headers.Authorization,undefined);
  assert.equal(calls[0].options.cache,'no-store');
 }
 for(const origin of ['https://test.skola.eduvize.cz.evil.test','https://pborovicka72-dotcom.github.io','https://example.onrender.com']){
@@ -31,4 +33,4 @@ assert.ok(read('LICENSE-jsQR.txt').length>1000);
 for(const name of ['remote-client.js','kiosk-cloud.js','kiosk-documents.js','kiosk-output-link.js']){
  assert.equal(read(name).includes('onrender.com'),false,name+' must use the deployment origin');
 }
-console.log('Environment isolation, public capability transport, asset paths and QR packaging passed.');
+console.log('Environment isolation, gated capability transport, asset paths and QR packaging passed.');

@@ -12,9 +12,8 @@
  const details=document.createElement('div'),title=document.createElement('strong'),status=document.createElement('span'),disconnect=document.createElement('button');title.textContent='Ovládat telefonem';status.setAttribute('role','status');disconnect.className='edu-admin__button edu-admin__button--secondary';disconnect.textContent='Odpojit telefon';disconnect.hidden=true;details.append(title,pairCode,status,disconnect);host.append(image,details);const panel=document.getElementById('statusPanel');panel.append(host);new ResizeObserver(()=>{const h=panel.clientHeight;if(h>0){const size=Math.max(40,Math.min(180,h-76,panel.clientWidth*.22));image.style.height=size+'px';image.style.width=size+'px';}}).observe(panel);
  if(preview){
  host.classList.add('kiosk-remote-pair--preview');
- image.src='remote-preview.svg';image.alt='Ukázka QR kódu; párování telefonu je dostupné až ve výstupu.';
- title.textContent='Ovládat telefonem';pairCode.textContent='Kód: 1234 5678';pairCode.hidden=false;
- const syncPreview=()=>{host.hidden=adapter.previewEnabled?.()===false;image.hidden=host.hidden;};
+ title.textContent='Ovládání telefonem · náhled';pairCode.textContent='QR až ve veřejném výstupu';pairCode.hidden=false;
+ const syncPreview=()=>{host.hidden=adapter.previewEnabled?.()===false;image.hidden=true;};
  window.addEventListener('eduvize-kiosk-remote-update',syncPreview);
  syncPreview();
  return; // No pairing session or transport requests from the admin preview.

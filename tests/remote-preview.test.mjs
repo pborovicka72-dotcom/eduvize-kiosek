@@ -12,11 +12,11 @@ function fixture(preview,enabled=true){
 }
 const p=fixture(true);
 assert.equal(p.nodes.length,1);const host=p.nodes[0],img=host.children[0];
-assert.equal(img.src,'remote-preview.svg');assert.equal(img.hidden,false);
-assert.match(img.alt,/Ukázka/);assert.equal(p.calls,0);
+assert.equal(img.src,undefined);assert.equal(img.hidden,true);assert.equal(p.calls,0);
+const details=host.children[1];assert.match(details.children[0].textContent,/náhled/);assert.match(details.children[1].textContent,/QR až ve veřejném výstupu/);
 p.toggle(false);assert.equal(host.hidden,true);assert.equal(img.hidden,true);
-p.toggle(true);assert.equal(host.hidden,false);assert.equal(img.hidden,false);assert.equal(p.calls,0);
+p.toggle(true);assert.equal(host.hidden,false);assert.equal(img.hidden,true);assert.equal(p.calls,0);
 assert.equal(fixture(true,false).nodes[0].hidden,true);
 assert.equal(fixture(false,false).nodes.length,0);
 assert.equal(fixture(false,true).calls,1);
-console.log('QR preview: visible, disabled/enabled live, no pairing calls; live output still starts pairing.');
+console.log('QR preview: no nonfunctional QR image or pairing calls; live output still starts pairing.');

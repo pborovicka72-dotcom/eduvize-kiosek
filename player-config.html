@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="/eduvize-styly/design-system/admin-app-shell.css">
   <link rel="stylesheet" href="/eduvize-styly/design-system/app-icons.css">
   <link rel="stylesheet" href="/eduvize-styly/design-system/configuration-profiles.css">
-  <link rel="stylesheet" href="player-config.css?v=2">
+  <link rel="stylesheet" href="player-config.css?v=3">
   <script defer src="/eduvize-styly/design-system/admin-navigation.js"></script>
   <script defer src="/eduvize-styly/design-system/admin-auth.js"></script>
   <script defer src="/eduvize-styly/design-system/active-theme.js"></script>
@@ -30,7 +30,7 @@
   <script defer src="/eduvize-styly/design-system/output-client.js"></script>
   <script defer src="/eduvize-styly/design-system/nsp-geometry.js"></script>
   <script defer src="player-model.js?v=1"></script>
-  <script defer src="player-config.js?v=2"></script>
+  <script defer src="player-config.js?v=3"></script>
 </head>
 <body class="ev-admin">
 <div class="workflow-app-shell" data-edu-app-shell="native">
@@ -49,14 +49,15 @@
     <main class="edu-admin-page player-admin">
       <div class="workflow-app-heading"><div><a href="/eduvize-styly/aplikace.html#aplikace">← Všechny aplikace</a><h1>Přehrávač</h1><p>Sestavte obrazovku z již publikovaných výstupů.</p></div></div>
       <section class="edu-admin__card player-card player-screen-choice"><div class="edu-admin__control-row"><label class="edu-admin__field player-existing">Uložená obrazovka<select id="existing"><option value="">Nová obrazovka</option></select></label><div class="edu-admin__actions"><button class="edu-admin__button edu-admin__button--secondary" id="new" type="button">Nová obrazovka</button></div></div></section>
-      <section class="edu-admin__card player-card"><div class="player-section-heading"><div><h2>Rozložení obrazovky</h2><p>Vyberte orientaci a podobu segmentů.</p></div><div class="player-orientations" role="group" aria-label="Orientace obrazovky"><button type="button" class="edu-admin__button edu-admin__button--secondary" data-orientation="landscape" aria-pressed="true">Na šířku</button><button type="button" class="edu-admin__button edu-admin__button--secondary" data-orientation="portrait" aria-pressed="false">Na výšku</button></div></div><div id="layouts" class="player-layouts" role="group" aria-label="Doporučená rozložení"></div><details id="more-layouts" class="player-more-layouts"><summary>Další rozložení</summary><div id="additional-layouts" class="player-layouts" role="group" aria-label="Další rozložení"></div></details></section>
+      <section class="edu-admin__card player-card player-template-section" aria-labelledby="player-template-title"><div class="player-template-picker"><h2 id="player-template-title">Šablona Newline Signage Pro</h2><p>Vyberte orientaci a klikněte přímo na požadovaný segment ve vizuálu šablony, případně jej zvolte pod náhledy.</p><div class="player-orientations" role="group" aria-label="Orientace obrazovky"><button type="button" data-orientation="landscape" aria-pressed="true">Na šířku · 8 šablon</button><button type="button" data-orientation="portrait" aria-pressed="false">Na výšku · 5 šablon</button></div><div id="layouts" class="player-layouts" role="group" aria-label="Šablony obrazovky"></div><h3>Vyberte segment</h3><div id="segment-options" class="player-segment-options" role="group" aria-label="Segmenty vybrané šablony"></div><h3>Náhled celé obrazovky</h3><div class="player-screen-map-wrap"><div id="screen-map" class="player-screen-map" role="group" aria-label="Rozložení a výběr segmentu obrazovky"></div></div></div></section>
       <div class="player-workspace">
-        <section class="edu-admin__card player-card player-editor"><div class="player-section-heading"><div><h2>Obsah částí</h2><p>Výstupy se střídají ve zvoleném pořadí.</p></div></div><div id="segment-tabs" class="player-segment-tabs" role="group" aria-label="Části obrazovky"></div><div id="segments" class="player-segments"></div></section>
-        <section class="edu-admin__card player-card player-preview-card"><div class="player-section-heading"><div><h2>Náhled celé obrazovky</h2><p>Ukazuje právě upravované nastavení.</p></div></div><div id="screen-map" class="player-screen-map" aria-label="Rozložení a výběr části obrazovky"></div><iframe id="preview" title="Náhled upravovaného Přehrávače" src="player.html?preview=1"></iframe><p class="player-preview-note">Veřejný odkaz vede na poslední publikovanou verzi.</p></section>
+        <section class="edu-admin__card player-card player-editor"><div class="player-section-heading"><div><h2>Obsah vybraného segmentu</h2><p>Výstupy se střídají ve zvoleném pořadí.</p></div></div><div id="segments" class="player-segments"></div></section>
+        <section class="edu-admin__card player-card player-preview-card"><div class="player-section-heading"><div><h2>Živý náhled Přehrávače</h2><p>Ukazuje právě upravované nastavení.</p></div></div><iframe id="preview" title="Náhled upravovaného Přehrávače" src="player.html?preview=1"></iframe><p class="player-preview-note">Veřejný odkaz vede na poslední publikovanou verzi.</p></section>
       </div>
       <section class="player-publish-bar" aria-label="Akce Přehrávače"><button class="edu-admin__button" id="publish" type="button">Uložit a publikovat</button><a class="edu-admin__button edu-admin__button--secondary" id="open" href="#" target="_blank" rel="noopener noreferrer" hidden>Otevřít publikovaný výstup</a><button class="edu-admin__button edu-admin__button--secondary" id="copy" type="button" disabled>Kopírovat odkaz</button><p id="status" role="status" aria-live="polite">Načítám školní profil…</p></section>
     </main>
   </div>
 </div>
+<dialog id="content-dialog" class="player-content-dialog" aria-labelledby="content-dialog-title"><div class="player-content-dialog-inner"><header><div><h2 id="content-dialog-title">Přidat obsah do segmentu</h2><p>Přetáhněte publikovaný výstup do seznamu vpravo, nebo použijte tlačítko Přidat.</p></div><button id="content-dialog-close" class="edu-admin__button edu-admin__button--secondary" type="button">Hotovo</button></header><div class="player-content-columns"><section><label for="content-search">Dostupné výstupy</label><input id="content-search" type="search" placeholder="Hledat podle názvu nebo aplikace"><div id="content-catalog" class="player-content-catalog"></div></section><section><h3 id="content-target-title">Obsah segmentu</h3><p>Pořadí výstupů lze změnit přetažením nebo šipkami v editoru.</p><div id="content-dropzone" class="player-content-dropzone" aria-label="Přetáhněte sem výstupy"></div></section></div></div></dialog>
 </body>
 </html>

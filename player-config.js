@@ -10,7 +10,9 @@
   const $ = id => document.getElementById(id);
   const ID = /^[a-f0-9]{32}$/;
   let config = model.empty(), catalog = [], profileId = '', schoolId = '', outputId = '', busy = false, loadEpoch = 0;
-  let selectedSegment = 1, baseline = JSON.stringify(config);
+  let selectedItem = null, pendingId = '', dragging = null, baseline = JSON.stringify(config);
+  const openedApps = new Set();
+  let unavailableApps = new Set();
   function note(message, error = false) { $('status').textContent = message; $('status').dataset.error = String(error); }
   function dirty() { return JSON.stringify(config) !== baseline; }
   function guard() {
@@ -23,10 +25,10 @@
   function button(label, action, disabled = false) {
     const el = document.createElement('button'); el.type = 'button'; el.textContent = label; el.disabled = disabled; el.onclick = action; return el;
   }
-  function compatible(item, segmentId) {
+  function compatible(item, segmentId, state = config) {
     const p = item.presentation, g = p?.geometry;
     return p?.mode === 'web' || (p?.mode === 'nsp' && g?.registryId === 'nsp-4k' &&
-      g.orientation === config.orientation && g.layoutId === config.layoutId && g.segmentId === segmentId);
+      g.orientation === state.orientation && g.layoutId === state.layoutId && g.segmentId === segmentId);
   }
   function candidates(appId, segmentId) { return catalog.filter(item => item.appId === appId && compatible(item, segmentId)); }
   function preview() {
@@ -45,78 +47,100 @@
     portrait: ['Celá obrazovka', 'Horní lišta a hlavní plocha', 'Střed a dvě spodní části',
       'Tři části pod sebou', 'Čtyři stejné části']
   };
-  function selectLayout(layoutId, segmentId = 1) {
-    if (layoutId !== config.layoutId && config.segments.some(segment => segment.entries.length) &&
-        !confirm('Změna šablony odstraní přiřazené výstupy. Pokračovat?')) return;
-    if (layoutId !== config.layoutId) config = model.empty(config.orientation, layoutId);
-    selectedSegment = segmentId;
-    render();
-  }
-  function shape(host, orientation, layoutId, interactive = false) {
-    const geometry = model.layout(orientation, Number(layoutId));
-    host.replaceChildren();
-    host.dataset.orientation = orientation;
-    geometry.forEach(rect => {
-      const node = document.createElement(interactive ? 'button' : 'span');
-      node.style.left = rect.x / rect.canvasWidth * 100 + '%';
-      node.style.top = rect.y / rect.canvasHeight * 100 + '%';
-      node.style.width = rect.width / rect.canvasWidth * 100 + '%';
-      node.style.height = rect.height / rect.canvasHeight * 100 + '%';
-      node.textContent = String(rect.id);
-      node.className = 'player-segment-shape';
-      if (config.orientation === orientation && config.layoutId === Number(layoutId) && selectedSegment === rect.id)
-        node.classList.add('is-selected');
-      if (interactive) {
-        node.type = 'button';
-        node.setAttribute('aria-label', 'Segment ' + rect.id + ': ' + rect.width + ' × ' + rect.height + ' px');
-        node.setAttribute('aria-pressed', String(selectedSegment === rect.id));
-        node.onclick = () => { selectedSegment = rect.id; render(); };
-      } else {
-        node.title = 'Vybrat segment ' + rect.id;
-        node.onclick = event => { event.stopPropagation(); selectLayout(Number(layoutId), rect.id); };
+  function changeLayout(orientation, layoutId) {
+    if (orientation === config.orientation && layoutId === config.layoutId) return;
+    const next = model.empty(orientation, layoutId);
+    const moves = [];
+    for (const segment of config.segments) for (const entry of segment.entries) {
+      const item = catalog.find(candidate => candidate.id === entry.outputId);
+      const targets = next.segments.filter(target => item && compatible(item, target.id, next) && target.entries.length < 20);
+      const target = targets.find(candidate => candidate.id === segment.id) || targets[0];
+      if (!target) {
+        note('Šablonu nelze změnit: Některý výstup není pro nové rozdělení vhodný. Nejdříve jej odeberte nebo nahraďte.', true);
+        return;
       }
-      host.append(node);
-    });
+      target.entries.push({ ...entry });
+      if (target.id !== segment.id) moves.push('Segment ' + segment.id + ' → ' + target.id);
+    }
+    if (moves.length && !confirm('Nová šablona přesune obsah mezi segmenty (' + [...new Set(moves)].join(', ') + '). Pokračovat?')) return;
+    config = next; selectedItem = null; pendingId = ''; render();
+    note(moves.length ? 'Šablona byla změněna a obsah převeden do vhodných segmentů.' :
+      'Šablona byla změněna. Obsah ve stejných segmentech zůstal zachován.');
+  }
+  function miniShape(host, orientation, layoutId) {
+    const geometry = model.layout(orientation, Number(layoutId));
+    host.dataset.orientation = orientation;
+    for (const rect of geometry) {
+      const shape = document.createElement('span'); shape.className = 'player-segment-shape';
+      shape.textContent = String(rect.id);
+      shape.style.left = rect.x / rect.canvasWidth * 100 + '%';
+      shape.style.top = rect.y / rect.canvasHeight * 100 + '%';
+      shape.style.width = rect.width / rect.canvasWidth * 100 + '%';
+      shape.style.height = rect.height / rect.canvasHeight * 100 + '%';
+      host.append(shape);
+    }
   }
   function renderLayouts() {
     const host = $('layouts'); host.replaceChildren();
-    const layouts = root.EduvizeNSPLayouts.layouts[config.orientation];
-    for (const [id, rects] of Object.entries(layouts)) {
-      const tile = button('', () => selectLayout(Number(id)));
-      tile.className = 'player-layout';
-      tile.setAttribute('aria-pressed', String(Number(id) === config.layoutId));
+    for (const [id, rects] of Object.entries(root.EduvizeNSPLayouts.layouts[config.orientation])) {
+      const tile = button('', () => changeLayout(config.orientation, Number(id)));
+      tile.className = 'player-layout'; tile.setAttribute('aria-pressed', String(Number(id) === config.layoutId));
       tile.setAttribute('aria-label', 'Styl ' + id + ': ' + LAYOUT_NAMES[config.orientation][Number(id) - 1] +
         ', ' + rects.length + (rects.length === 1 ? ' segment' : rects.length < 5 ? ' segmenty' : ' segmentů'));
-      const mini = document.createElement('span'); mini.className = 'player-layout-mini';
-      mini.style.aspectRatio = config.orientation === 'portrait' ? '9/16' : '16/9';
-      shape(mini, config.orientation, id);
       const title = document.createElement('strong'); title.textContent = 'Styl ' + id;
+      const mini = document.createElement('span'); mini.className = 'player-layout-mini';
+      miniShape(mini, config.orientation, id);
       const description = document.createElement('small'); description.textContent = LAYOUT_NAMES[config.orientation][Number(id) - 1];
-      tile.append(title, mini, description);
-      host.append(tile);
+      tile.append(title, mini, description); host.append(tile);
     }
   }
-  function renderSegments() {
-    const host = $('segment-options'); host.replaceChildren();
-    for (const rect of model.layout(config.orientation, config.layoutId)) {
-      const control = button('Segment ' + rect.id + ': ' + rect.width + ' × ' + rect.height + ' px', () => {
-        selectedSegment = rect.id; render();
-      });
-      control.className = 'player-segment-option';
-      control.setAttribute('aria-pressed', String(rect.id === selectedSegment));
-      host.append(control);
-    }
+  function itemById(id) { return catalog.find(item => item.id === id); }
+  function outputCount(number) { return number + (number === 1 ? ' výstup' : number > 1 && number < 5 ? ' výstupy' : ' výstupů'); }
+  function canPlace(data, segmentId) {
+    const target = config.segments[segmentId - 1];
+    if (!target) return false;
+    const entry = data?.kind === 'entry' ? config.segments[data.segmentId - 1]?.entries[data.index] : null;
+    const item = itemById(data?.kind === 'entry' ? entry?.outputId : data?.id);
+    return Boolean(item && compatible(item, segmentId) &&
+      (target.entries.length < 20 || data.kind === 'entry' && data.segmentId === segmentId));
   }
-  let dragging = null;
-  function startDrag(event, data) {
+  function place(data, segmentId, at = null) {
+    if (!canPlace(data, segmentId)) { note('Výstup není pro tento segment dostupný nebo je segment plný.', true); return; }
+    const target = config.segments[segmentId - 1];
+    let index = at === null ? target.entries.length : at;
+    let entry;
+    if (data.kind === 'catalog') {
+      const item = itemById(data.id);
+      entry = { appId: item.appId, outputId: item.id, seconds: 30 };
+    } else if (data.kind === 'entry') {
+      const source = config.segments[data.segmentId - 1];
+      [entry] = source.entries.splice(data.index, 1);
+      if (source === target && data.index < index) index--;
+    } else return;
+    target.entries.splice(index, 0, entry);
+    selectedItem = { segmentId, index }; pendingId = ''; dragging = null;
+    render(); note('Výstup je v segmentu ' + segmentId + '. Nastavte dobu zobrazení.');
+    requestAnimationFrame(() => $('item-detail').scrollIntoView({ block: 'nearest' }));
+  }
+  function dragStart(event, data) {
     dragging = data;
     event.dataTransfer.effectAllowed = data.kind === 'catalog' ? 'copy' : 'move';
     event.dataTransfer.setData('text/plain', JSON.stringify(data));
   }
-  function pointerGrip(data) {
-    const grip = document.createElement('span');
-    grip.className = 'player-drag-grip'; grip.textContent = '⠿';
-    grip.title = 'Přetáhnout'; grip.setAttribute('aria-hidden', 'true');
+  function dragTarget(node, segmentId, index = null) {
+    node.ondragover = event => {
+      if (!canPlace(dragging, segmentId)) return;
+      event.preventDefault(); event.stopPropagation(); node.classList.add('is-over');
+    };
+    node.ondragleave = () => node.classList.remove('is-over');
+    node.ondrop = event => {
+      event.preventDefault(); event.stopPropagation(); node.classList.remove('is-over');
+      if (dragging) place(dragging, segmentId, index);
+    };
+  }
+  function touchGrip(data) {
+    const grip = document.createElement('span'); grip.className = 'player-drag-grip';
+    grip.textContent = '⠿'; grip.title = 'Přetáhnout'; grip.setAttribute('aria-hidden', 'true');
     let start = null;
     grip.onpointerdown = event => {
       if (event.pointerType === 'mouse' || event.button !== 0) return;
@@ -128,128 +152,180 @@
       if (!start || start.id !== event.pointerId) return;
       if (!start.active && Math.hypot(event.clientX - start.x, event.clientY - start.y) < 8) return;
       start.active = true;
-      $('content-dropzone').classList.toggle('is-over', Boolean(document.elementFromPoint(event.clientX, event.clientY)?.closest('#content-dropzone')));
+      document.querySelectorAll('.player-canvas-segment.is-over,.player-segment-lane.is-over').forEach(node => node.classList.remove('is-over'));
+      const target = document.elementFromPoint(event.clientX, event.clientY)?.closest('[data-drop-segment]');
+      if (target && canPlace(data, Number(target.dataset.dropSegment))) target.classList.add('is-over');
       event.preventDefault();
     };
     grip.onpointerup = event => {
       if (!start || start.id !== event.pointerId) return;
-      const target = document.elementFromPoint(event.clientX, event.clientY)?.closest('.player-drop-entry, #content-dropzone');
+      const target = document.elementFromPoint(event.clientX, event.clientY)?.closest('[data-drop-segment]');
       const active = start.active; start = null;
-      $('content-dropzone').classList.remove('is-over');
-      if (active && target && $('content-dropzone').contains(target)) {
-        dragging = data;
-        dropAt(target.classList.contains('player-drop-entry') ? Number(target.dataset.index) :
-          config.segments[selectedSegment - 1].entries.length);
-      }
+      if (target) target.classList.remove('is-over');
+      if (active && target) place(data, Number(target.dataset.dropSegment),
+        target.dataset.dropIndex === undefined ? null : Number(target.dataset.dropIndex));
     };
-    grip.onpointercancel = () => { start = null; $('content-dropzone').classList.remove('is-over'); };
+    grip.onpointercancel = () => { start = null; document.querySelectorAll('.is-over').forEach(node => node.classList.remove('is-over')); };
     return grip;
   }
-  function dropAt(index) {
-    const segment = config.segments[selectedSegment - 1];
-    if (!dragging || !segment) return;
-    if (dragging.kind === 'catalog') {
-      const item = catalog.find(candidate => candidate.id === dragging.id && compatible(candidate, segment.id));
-      if (!item || segment.entries.length >= 20) return;
-      segment.entries.splice(index, 0, { appId: item.appId, outputId: item.id, seconds: 30 });
-    } else if (dragging.kind === 'entry') {
-      const from = dragging.index;
-      if (!Number.isInteger(from) || from < 0 || from >= segment.entries.length) return;
-      const [entry] = segment.entries.splice(from, 1);
-      segment.entries.splice(from < index ? index - 1 : index, 0, entry);
+  function renderLibrary() {
+    const host = $('library-apps'); host.replaceChildren();
+    const query = $('library-search').value.trim().toLocaleLowerCase('cs');
+    $('library-hint').textContent = pendingId ? 'Výstup je vybraný. Klikněte na segment vpravo nebo použijte tlačítko Vložit sem.' :
+      'Přetáhněte výstup na segment vpravo.';
+    for (const [appId, appName] of Object.entries(model.APPS)) {
+      const all = catalog.filter(item => item.appId === appId);
+      const matches = all.filter(item => (item.label + ' ' + appName).toLocaleLowerCase('cs').includes(query));
+      if (query && !appName.toLocaleLowerCase('cs').includes(query) && !matches.length) continue;
+      const entries = query && appName.toLocaleLowerCase('cs').includes(query) ? all : matches;
+      const group = document.createElement('details'); group.className = 'player-app-group';
+      group.open = openedApps.has(appId) || Boolean(query);
+      group.ontoggle = () => { if (!group.isConnected) return; if (group.open) openedApps.add(appId); else openedApps.delete(appId); };
+      const summary = document.createElement('summary');
+      const name = document.createElement('strong'); name.textContent = appName;
+      const count = document.createElement('span'); count.textContent = all.length ? outputCount(all.length) : 'Bez výstupu';
+      summary.append(name, count); group.append(summary);
+      const body = document.createElement('div'); body.className = 'player-app-body';
+      if (!entries.length) {
+        const empty = document.createElement('p');
+        empty.textContent = unavailableApps.has(appId) ? 'Aplikace v tomto profilu není dostupná.' :
+          'Zatím žádný publikovaný výstup.';
+        body.append(empty);
+      }
+      for (const item of entries) {
+        const ready = config.segments.some(segment => compatible(item, segment.id));
+        const card = document.createElement('div'); card.className = 'player-source';
+        card.draggable = ready; card.classList.toggle('is-incompatible', !ready);
+        card.classList.toggle('is-pending', pendingId === item.id);
+        card.ondragstart = event => dragStart(event, { kind: 'catalog', id: item.id });
+        card.ondragend = () => { dragging = null; card.classList.remove('is-dragging'); };
+        const text = document.createElement('div');
+        const title = document.createElement('strong'); title.textContent = item.label;
+        const kind = document.createElement('small'); kind.textContent = item.presentation.mode === 'nsp' ?
+          'Výstup NSP · segment ' + item.presentation.geometry.segmentId : 'Běžná stránka';
+        text.append(title, kind);
+        if (ready) card.append(touchGrip({ kind: 'catalog', id: item.id }));
+        card.append(text);
+        const select = button('Vybrat', () => { pendingId = item.id; render(); $('screen-map').scrollIntoView({ block: 'nearest' }); }, !ready);
+        select.className = 'edu-admin__button edu-admin__button--secondary'; card.append(select);
+        body.append(card);
+      }
+      if (!unavailableApps.has(appId)) {
+        const create = document.createElement('a'); create.className = 'player-create-output';
+        create.href = '/eduvize-styly/aplikace.html#aplikace'; create.target = '_blank'; create.rel = 'noopener noreferrer';
+        create.textContent = all.length ? 'Vytvořit další výstup ↗' : 'Vytvořit výstup v aplikaci ↗';
+        body.append(create);
+      }
+      group.append(body); host.append(group);
     }
-    dragging = null;
-    render();
   }
-  function renderDialog() {
-    const dialog = $('content-dialog');
-    if (!dialog.open) return;
-    const segment = config.segments[selectedSegment - 1];
-    $('content-dialog-title').textContent = 'Přidat obsah do segmentu ' + segment.id;
-    $('content-target-title').textContent = 'Pořadí v segmentu ' + segment.id;
-    const query = $('content-search').value.trim().toLocaleLowerCase('cs');
-    const choices = catalog.filter(item => compatible(item, segment.id) &&
-      (item.label + ' ' + (model.APPS[item.appId] || '')).toLocaleLowerCase('cs').includes(query));
-    const list = $('content-catalog'); list.replaceChildren();
-    if (!choices.length) {
-      const empty = document.createElement('p'); empty.className = 'player-empty';
-      empty.textContent = 'Pro tento segment nejsou dostupné žádné odpovídající publikované výstupy.';
-      list.append(empty);
+  function renderCanvas() {
+    const geometry = model.layout(config.orientation, config.layoutId);
+    const host = $('screen-map'); host.replaceChildren(); host.dataset.orientation = config.orientation;
+    for (const rect of geometry) {
+      const segment = config.segments[rect.id - 1];
+      const box = document.createElement('div'); box.className = 'player-canvas-segment';
+      box.dataset.dropSegment = String(rect.id); box.tabIndex = 0; box.setAttribute('role', 'button');
+      box.setAttribute('aria-label', 'Segment ' + rect.id + ': ' + rect.width + ' × ' + rect.height + ' px, ' +
+        outputCount(segment.entries.length) + (pendingId && canPlace({ kind: 'catalog', id: pendingId }, rect.id) ? ', vložit vybraný výstup' : ''));
+      box.style.left = rect.x / rect.canvasWidth * 100 + '%'; box.style.top = rect.y / rect.canvasHeight * 100 + '%';
+      box.style.width = rect.width / rect.canvasWidth * 100 + '%'; box.style.height = rect.height / rect.canvasHeight * 100 + '%';
+      box.classList.toggle('can-insert', Boolean(pendingId && canPlace({ kind: 'catalog', id: pendingId }, rect.id)));
+      const number = document.createElement('strong'); number.textContent = 'Segment ' + rect.id;
+      const info = document.createElement('small'); info.textContent = segment.entries.length ?
+        outputCount(segment.entries.length) : 'Přetáhněte obsah';
+      box.append(number, info);
+      if (box.classList.contains('can-insert')) {
+        const hint = document.createElement('em'); hint.textContent = 'Vložit sem'; box.append(hint);
+      }
+      box.onclick = () => { if (pendingId) place({ kind: 'catalog', id: pendingId }, rect.id); };
+      box.onkeydown = event => { if (pendingId && ['Enter', ' '].includes(event.key)) { event.preventDefault(); box.click(); } };
+      dragTarget(box, rect.id); host.append(box);
     }
-    for (const item of choices) {
-      const card = document.createElement('div'); card.className = 'player-content-item'; card.draggable = true;
-      card.ondragstart = event => startDrag(event, { kind: 'catalog', id: item.id });
-      card.ondragend = () => { dragging = null; card.classList.remove('is-dragging'); };
-      const words = document.createElement('div');
-      const title = document.createElement('strong'); title.textContent = item.label;
-      const app = document.createElement('small'); app.textContent = model.APPS[item.appId] || item.appId;
-      words.append(title, app);
-      const add = button('Přidat', () => { dragging = { kind: 'catalog', id: item.id }; dropAt(segment.entries.length); }, segment.entries.length >= 20);
-      add.className = 'edu-admin__button edu-admin__button--secondary';
-      card.append(pointerGrip({ kind: 'catalog', id: item.id }), words, add); list.append(card);
+    const lanes = $('segment-lanes'); lanes.replaceChildren();
+    for (const rect of geometry) {
+      const segment = config.segments[rect.id - 1];
+      const lane = document.createElement('section'); lane.className = 'player-segment-lane';
+      lane.dataset.dropSegment = String(rect.id);
+      const heading = document.createElement('div'); heading.className = 'player-lane-heading';
+      const title = document.createElement('h3'); title.textContent = 'Segment ' + rect.id;
+      const size = document.createElement('small'); size.textContent = rect.width + ' × ' + rect.height + ' px';
+      heading.append(title, size);
+      if (pendingId && canPlace({ kind: 'catalog', id: pendingId }, rect.id)) {
+        const add = button('Vložit sem', () => place({ kind: 'catalog', id: pendingId }, rect.id));
+        add.className = 'edu-admin__button edu-admin__button--secondary'; heading.append(add);
+      }
+      lane.append(heading);
+      if (!segment.entries.length) {
+        const empty = document.createElement('p'); empty.className = 'player-lane-empty';
+        empty.textContent = 'Přetáhněte sem publikovaný výstup.'; lane.append(empty);
+      }
+      segment.entries.forEach((entry, index) => {
+        const item = itemById(entry.outputId);
+        const row = document.createElement('div'); row.className = 'player-lane-entry'; row.draggable = true;
+        row.dataset.dropSegment = String(rect.id); row.dataset.dropIndex = String(index);
+        row.classList.toggle('is-selected', selectedItem?.segmentId === rect.id && selectedItem?.index === index);
+        row.ondragstart = event => dragStart(event, { kind: 'entry', segmentId: rect.id, index });
+        row.ondragend = () => { dragging = null; row.classList.remove('is-over'); };
+        dragTarget(row, rect.id, index);
+        row.append(touchGrip({ kind: 'entry', segmentId: rect.id, index }));
+        const select = button((index + 1) + '. ' + (item?.label || 'Nedostupný výstup'), () => {
+          selectedItem = { segmentId: rect.id, index }; render();
+        });
+        select.className = 'player-lane-select';
+        const duration = document.createElement('small'); duration.textContent = entry.seconds + ' s';
+        row.append(select, duration); lane.append(row);
+      });
+      dragTarget(lane, rect.id); lanes.append(lane);
     }
-    const zone = $('content-dropzone'); zone.replaceChildren();
-    if (!segment.entries.length) {
-      const empty = document.createElement('p'); empty.className = 'player-drop-hint';
-      empty.textContent = 'Přetáhněte sem první výstup.'; zone.append(empty);
-    }
-    segment.entries.forEach((entry, index) => {
-      const item = catalog.find(candidate => candidate.id === entry.outputId);
-      const row = document.createElement('div'); row.className = 'player-drop-entry'; row.draggable = true;
-      row.dataset.index = String(index);
-      row.append(pointerGrip({ kind: 'entry', index }), document.createTextNode((index + 1) + '. ' +
-        (item?.label || 'Nedostupný výstup') + ' · ' + entry.seconds + ' s'));
-      row.ondragstart = event => startDrag(event, { kind: 'entry', index });
-      row.ondragend = () => { dragging = null; row.classList.remove('drop-before'); };
-      row.ondragover = event => { event.preventDefault(); event.stopPropagation(); row.classList.add('drop-before'); };
-      row.ondragleave = () => row.classList.remove('drop-before');
-      row.ondrop = event => { event.preventDefault(); event.stopPropagation(); row.classList.remove('drop-before'); dropAt(index); };
-      zone.append(row);
-    });
+    $('canvas-hint').textContent = pendingId ? 'Výstup je vybraný. Klikněte na cílový segment nebo na Vložit sem.' :
+      'Přetáhněte výstup zleva do požadovaného segmentu. V jednom segmentu se výstupy střídají v pořadí níže.';
+  }
+  function renderDetail() {
+    const host = $('item-detail-fields'); host.replaceChildren();
+    const section = $('item-detail');
+    const entry = selectedItem && config.segments[selectedItem.segmentId - 1]?.entries[selectedItem.index];
+    if (!entry) { selectedItem = null; section.hidden = true; return; }
+    section.hidden = false;
+    const item = itemById(entry.outputId);
+    $('item-detail-title').textContent = 'Nastavení: Segment ' + selectedItem.segmentId + ', výstup ' + (selectedItem.index + 1);
+    const source = document.createElement('p'); source.className = 'player-detail-source';
+    source.textContent = (item?.label || 'Nedostupný výstup') + ' · ' + (model.APPS[entry.appId] || entry.appId);
+    host.append(source);
+    const seconds = document.createElement('input'); seconds.type = 'number'; seconds.min = '5'; seconds.max = '3600'; seconds.step = '1'; seconds.value = String(entry.seconds);
+    seconds.id = 'item-seconds';
+    seconds.onchange = () => { entry.seconds = Number(seconds.value); render(); note('Doba zobrazení byla změněna.'); };
+    const duration = document.createElement('label'); duration.textContent = 'Doba zobrazení (sekundy)'; duration.append(seconds);
+    host.append(duration);
+    const replace = document.createElement('select'); replace.id = 'item-replace';
+    for (const candidate of catalog.filter(value => compatible(value, selectedItem.segmentId)))
+      replace.append(option(candidate.id, (model.APPS[candidate.appId] || candidate.appId) + ' · ' + candidate.label));
+    if (!item) replace.prepend(option(entry.outputId, 'Nedostupný výstup'));
+    replace.value = entry.outputId;
+    replace.onchange = () => { const next = itemById(replace.value); if (next) { entry.appId = next.appId; entry.outputId = next.id; render(); note('Výstup byl nahrazen.'); } };
+    const replacement = document.createElement('label'); replacement.textContent = 'Nahradit jiným publikovaným výstupem'; replacement.append(replace);
+    host.append(replacement);
+    const actions = document.createElement('div'); actions.className = 'player-detail-actions';
+    const segment = config.segments[selectedItem.segmentId - 1], index = selectedItem.index;
+    const up = button('↑ Posunout nahoru', () => {
+      [segment.entries[index - 1], segment.entries[index]] = [segment.entries[index], segment.entries[index - 1]];
+      selectedItem.index--; render();
+    }, index === 0);
+    const down = button('↓ Posunout dolů', () => {
+      [segment.entries[index + 1], segment.entries[index]] = [segment.entries[index], segment.entries[index + 1]];
+      selectedItem.index++; render();
+    }, index === segment.entries.length - 1);
+    const remove = button('Odebrat', () => { segment.entries.splice(index, 1); selectedItem = null; render(); });
+    for (const control of [up, down, remove]) control.className = 'edu-admin__button edu-admin__button--secondary';
+    actions.append(up, down, remove); host.append(actions);
+    const open = document.createElement('a'); open.className = 'player-create-output';
+    open.href = '/eduvize-styly/aplikace.html#aplikace'; open.target = '_blank'; open.rel = 'noopener noreferrer';
+    open.textContent = 'Otevřít nastavení aplikací v nové kartě ↗'; host.append(open);
   }
   function render() {
     for (const control of document.querySelectorAll('[data-orientation]'))
       control.setAttribute('aria-pressed', String(control.dataset.orientation === config.orientation));
-    selectedSegment = Math.min(selectedSegment, config.segments.length);
-    renderLayouts();
-    renderSegments();
-    const host = $('segments'); host.replaceChildren();
-    const segment = config.segments[selectedSegment - 1];
-    const section = document.createElement('section'); section.className = 'player-segment-editor';
-    const title = document.createElement('h3'); title.textContent = 'Segment ' + segment.id;
-    const help = document.createElement('p'); help.textContent = 'Obsah se střídá shora dolů podle zadané doby.';
-    section.append(title, help);
-    if (!segment.entries.length) {
-      const empty = document.createElement('p'); empty.className = 'player-empty';
-      empty.textContent = 'Tento segment zatím nemá žádný výstup.'; section.append(empty);
-    }
-    segment.entries.forEach((entry, index) => {
-        const row = document.createElement('div'); row.className = 'player-entry';
-        const item = catalog.find(candidate => candidate.id === entry.outputId);
-        const identity = document.createElement('div'); identity.className = 'player-entry-identity';
-        const name = document.createElement('strong'); name.textContent = item?.label || 'Nedostupný výstup';
-        const app = document.createElement('small'); app.textContent = model.APPS[entry.appId] || entry.appId;
-        identity.append(name, app); row.append(identity);
-        const seconds = document.createElement('input'); seconds.type = 'number'; seconds.min = '5'; seconds.max = '3600'; seconds.step = '1'; seconds.value = String(entry.seconds);
-        seconds.onchange = () => { entry.seconds = Number(seconds.value); preview(); note('Máte nepublikované změny.'); };
-        const field = document.createElement('label'); field.textContent = 'Doba (s)'; field.append(seconds); row.append(field);
-        const actions = document.createElement('div'); actions.className = 'player-entry-actions';
-        const up = button('↑', () => { [segment.entries[index - 1], segment.entries[index]] = [segment.entries[index], segment.entries[index - 1]]; render(); }, index === 0);
-        up.className = 'edu-admin__button edu-admin__button--secondary'; up.setAttribute('aria-label', 'Posunout výstup nahoru');
-        const down = button('↓', () => { [segment.entries[index + 1], segment.entries[index]] = [segment.entries[index], segment.entries[index + 1]]; render(); }, index === segment.entries.length - 1);
-        down.className = 'edu-admin__button edu-admin__button--secondary'; down.setAttribute('aria-label', 'Posunout výstup dolů');
-        const remove = button('Odebrat', () => { segment.entries.splice(index, 1); render(); });
-        remove.className = 'edu-admin__button edu-admin__button--secondary';
-        actions.append(up, down, remove); row.append(actions);
-        section.append(row);
-    });
-    const add = button('+ Přidat obsah', () => { $('content-dialog').showModal(); renderDialog(); $('content-search').focus(); },
-      segment.entries.length >= 20 || !catalog.length);
-    add.className = 'edu-admin__button edu-admin__button--secondary player-add';
-    section.append(add); host.append(section);
-    shape($('screen-map'), config.orientation, config.layoutId, true);
-    preview();
-    renderDialog();
+    renderLayouts(); renderLibrary(); renderCanvas(); renderDetail(); preview();
     if (dirty()) note('Máte nepublikované změny.');
   }
   async function listApp(appId) {
@@ -278,7 +354,7 @@
     if (current.appId !== 'player' || current.profileId !== profileId) throw Error('Výstup patří jinému profilu.');
     config = model.validate(current.draft.payload);
     outputId = id;
-    baseline = JSON.stringify(config); selectedSegment = 1;
+    baseline = JSON.stringify(config); selectedItem = null; pendingId = '';
     const url = new URL(location.href); url.searchParams.set('player-id', id); history.replaceState(null, '', url);
     $('existing').value = id;
     $('open').hidden = current.state !== 'published';
@@ -291,15 +367,16 @@
     const groups = await Promise.allSettled(Object.keys(model.APPS).map(appId => listApp(appId)));
     if (epoch !== loadEpoch) return;
     const failed = groups.filter(result => result.status === 'rejected' && result.reason?.status !== 422);
+    unavailableApps = new Set(groups.flatMap((result, index) => result.status === 'rejected' && result.reason?.status === 422 ?
+      [Object.keys(model.APPS)[index]] : []));
     const found = groups.flatMap(result => result.status === 'fulfilled' ? result.value : [])
       .filter(item => item.state === 'published' && item.publishedSummary?.presentation)
       .map(item => ({ id: item.id, appId: item.appId, presentation: item.publishedSummary.presentation,
-        label: (item.label || item.publishedSummary.sourceName || model.APPS[item.appId]) +
-          (item.publishedSummary.presentation.mode === 'web' ? ' · Běžná stránka' :
-            ' · Segment ' + item.publishedSummary.presentation.geometry.segmentId) }));
+        label: item.label || item.publishedSummary.sourceName || model.APPS[item.appId] }));
+    if (!openedApps.size) for (const item of found.slice(0, 2)) openedApps.add(item.appId);
     catalog = found; render();
     note(failed.length ? 'Některé výstupy se nepodařilo načíst. Obnovte stránku před publikováním.' :
-      found.length ? 'Vyberte výstupy pro všechny segmenty.' :
+      found.length ? 'Přetáhněte publikované výstupy do segmentů obrazovky.' :
         'V tomto profilu zatím nejsou publikované výstupy aplikací. Nejprve je vytvořte v jejich nastavení.');
   }
   async function publish() {
@@ -363,29 +440,17 @@
   };
   $('new').onclick = () => {
     if (dirty() && !confirm('Začít novou obrazovku? Neuložené změny se ztratí.')) { $('existing').value = outputId; return; }
-    config = model.empty(); outputId = ''; selectedSegment = 1; baseline = JSON.stringify(config);
+    config = model.empty(); outputId = ''; selectedItem = null; pendingId = ''; baseline = JSON.stringify(config);
     const url = new URL(location.href); url.searchParams.delete('player-id'); history.replaceState(null, '', url);
     $('existing').value = ''; $('open').hidden = true; $('copy').disabled = true;
     render(); note('Nová obrazovka je připravená.');
   };
   for (const control of document.querySelectorAll('[data-orientation]')) control.onclick = () => {
     if (control.dataset.orientation === config.orientation) return;
-    if (config.segments.some(s => s.entries.length) &&
-        !confirm('Změna orientace odstraní přiřazené výstupy. Pokračovat?')) return;
-    config = model.empty(control.dataset.orientation, 1); selectedSegment = 1; render();
+    changeLayout(control.dataset.orientation, 1);
   };
   $('publish').onclick = publish;
-  $('content-dialog-close').onclick = () => $('content-dialog').close();
-  $('content-dialog').onclose = () => { dragging = null; $('content-search').value = ''; };
-  $('content-search').oninput = renderDialog;
-  $('content-dropzone').ondragover = event => { event.preventDefault(); $('content-dropzone').classList.add('is-over'); };
-  $('content-dropzone').ondragleave = event => {
-    if (!$('content-dropzone').contains(event.relatedTarget)) $('content-dropzone').classList.remove('is-over');
-  };
-  $('content-dropzone').ondrop = event => {
-    event.preventDefault(); $('content-dropzone').classList.remove('is-over');
-    dropAt(config.segments[selectedSegment - 1].entries.length);
-  };
+  $('library-search').oninput = renderLibrary;
   $('copy').onclick = async () => {
     try { guard(); const link = await client.getOutputLink(outputId); guard(); await navigator.clipboard.writeText(link.url); note('Odkaz Přehrávače byl zkopírován.'); }
     catch (error) { note('Odkaz se nepodařilo zkopírovat: ' + error.message); }

@@ -82,7 +82,7 @@
     let after, result = [];
     do {
       const page = await client.listOutputs({ appId, profileId, after, limit: 100 });
-      result.push(...page.items.filter(item => item.state === 'published'));
+      result.push(...page.items.filter(item => item.state === 'published' && !item.archived));
       after = page.nextCursor;
       if (result.length >= 500) break;
     } while (after);

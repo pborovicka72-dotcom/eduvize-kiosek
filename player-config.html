@@ -1,10 +1,62 @@
 <!doctype html>
-<html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Eduvize | Nastavení Přehrávače</title>
-<link rel="stylesheet" href="/eduvize-styly/design-system/admin-tokens.css"><link rel="stylesheet" href="/eduvize-styly/design-system/admin-components.css">
-<link rel="stylesheet" href="player-config.css?v=1"><script defer src="/eduvize-styly/design-system/admin-auth.js"></script>
-<script defer src="/eduvize-styly/design-system/output-client.js"></script><script defer src="/eduvize-styly/design-system/nsp-geometry.js"></script>
-<script defer src="player-model.js?v=1"></script><script defer src="player-config.js?v=1"></script></head>
-<body><main class="player-admin ev-admin"><header><p class="eyebrow">Eduvize · Přehrávač</p><h1>Nastavení Přehrávače</h1><p>Vyberte šablonu obrazovky. V každém segmentu se publikované výstupy střídají ve zvoleném pořadí a čase.</p></header>
-<section class="player-card"><div class="player-controls"><label>Uložený Přehrávač<select id="existing"><option value="">Nový Přehrávač</option></select></label><button id="new" type="button">Nový Přehrávač</button></div><div class="player-controls"><label>Orientace obrazovky<select id="orientation"><option value="landscape">Na šířku</option><option value="portrait">Na výšku</option></select></label><label>Šablona segmentů<select id="layout"></select></label></div><div id="segments" class="player-segments"></div></section>
-<section class="player-card"><h2>Náhled celé obrazovky</h2><iframe id="preview" title="Náhled Přehrávače" src="player.html?preview=1"></iframe></section>
-<section class="player-card player-actions"><button id="publish" type="button">Uložit a publikovat</button><button id="copy" type="button" disabled>Kopírovat odkaz</button><a id="open" href="#" target="_blank" rel="noopener noreferrer" hidden>Otevřít výstup</a><p id="status" role="status" aria-live="polite">Načítám školní profil…</p></section></main></body></html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Eduvize | Přehrávač</title>
+  <link rel="icon" type="image/svg+xml" href="/eduvize-styly/design-system/assets/eduvize-favicon.svg">
+  <script>
+    // Shared theme loading reserves edu-output for public pages.
+    // Accept existing editor links and use a distinct editor parameter.
+    const playerEditorUrl = new URL(location.href);
+    if (playerEditorUrl.searchParams.has('edu-output')) {
+      playerEditorUrl.searchParams.set('player-id', playerEditorUrl.searchParams.get('edu-output'));
+      playerEditorUrl.searchParams.delete('edu-output');
+      history.replaceState(null, '', playerEditorUrl);
+    }
+  </script>
+  <link rel="stylesheet" href="/eduvize-styly/design-system/admin-tokens.css">
+  <link rel="stylesheet" href="/eduvize-styly/design-system/admin-components.css">
+  <link rel="stylesheet" href="/eduvize-styly/design-system/admin-shell.css">
+  <link rel="stylesheet" href="/eduvize-styly/design-system/admin-app-shell.css">
+  <link rel="stylesheet" href="/eduvize-styly/design-system/app-icons.css">
+  <link rel="stylesheet" href="/eduvize-styly/design-system/configuration-profiles.css">
+  <link rel="stylesheet" href="player-config.css?v=2">
+  <script defer src="/eduvize-styly/design-system/admin-navigation.js"></script>
+  <script defer src="/eduvize-styly/design-system/admin-auth.js"></script>
+  <script defer src="/eduvize-styly/design-system/active-theme.js"></script>
+  <script defer src="/eduvize-styly/design-system/app-icons.js"></script>
+  <script defer src="/eduvize-styly/design-system/configuration-profiles.js"></script>
+  <script defer src="/eduvize-styly/design-system/admin-app-shell.js"></script>
+  <script defer src="/eduvize-styly/design-system/output-client.js"></script>
+  <script defer src="/eduvize-styly/design-system/nsp-geometry.js"></script>
+  <script defer src="player-model.js?v=1"></script>
+  <script defer src="player-config.js?v=2"></script>
+</head>
+<body class="ev-admin">
+<div class="workflow-app-shell" data-edu-app-shell="native">
+  <aside class="workflow-app-sidebar" aria-label="Hlavní navigace">
+    <a class="workflow-app-brand" href="/eduvize-styly/aplikace.html#prehled" aria-label="Eduvize – přehled"><img src="/eduvize-styly/design-system/assets/eduvize-logo.svg" alt="Eduvize"></a>
+    <div><p class="workflow-app-label">Hlavní nabídka</p><nav class="workflow-app-nav" aria-label="Správa školy">
+      <a href="/eduvize-styly/aplikace.html#prehled"><span data-edu-app-icon="school-systems" aria-hidden="true"></span>Přehled</a>
+      <a href="/eduvize-styly/aplikace.html#aplikace" aria-current="page"><span data-edu-app-icon="kiosk" aria-hidden="true"></span>Aplikace</a>
+      <a href="/eduvize-styly/aplikace.html#odkazy"><span data-edu-app-icon="link" aria-hidden="true"></span>Obrazovky a odkazy</a>
+      <a href="/eduvize-styly/ucet.html#school"><span data-edu-app-icon="school" aria-hidden="true"></span>Škola a tým</a>
+      <a href="/eduvize-styly/ucet.html#my-account"><span data-edu-app-icon="contact" aria-hidden="true"></span>Účet a licence</a>
+    </nav></div><p class="workflow-app-note">Správa školy a veřejných výstupů</p>
+  </aside>
+  <div class="workflow-app-main">
+    <div class="workflow-app-topbar"><div><strong>Správa školy</strong><small id="workflow-app-session">Ověřuji přihlášení…</small></div><div class="workflow-app-controls"><div class="workflow-app-profile-slot" id="workflow-app-profile-slot"><section class="edu-profile-panel edu-admin__card" id="player-profile-picker" aria-label="Aktivní profil školy"></section></div><a class="workflow-app-account" href="/eduvize-styly/ucet.html#my-account" aria-label="Můj účet" title="Můj účet"><span data-edu-app-icon="contact" aria-hidden="true"></span></a></div></div>
+    <main class="edu-admin-page player-admin">
+      <div class="workflow-app-heading"><div><a href="/eduvize-styly/aplikace.html#aplikace">← Všechny aplikace</a><h1>Přehrávač</h1><p>Sestavte obrazovku z již publikovaných výstupů.</p></div></div>
+      <section class="edu-admin__card player-card player-screen-choice"><div class="edu-admin__control-row"><label class="edu-admin__field player-existing">Uložená obrazovka<select id="existing"><option value="">Nová obrazovka</option></select></label><div class="edu-admin__actions"><button class="edu-admin__button edu-admin__button--secondary" id="new" type="button">Nová obrazovka</button></div></div></section>
+      <section class="edu-admin__card player-card"><div class="player-section-heading"><div><h2>Rozložení obrazovky</h2><p>Vyberte orientaci a podobu segmentů.</p></div><div class="player-orientations" role="group" aria-label="Orientace obrazovky"><button type="button" class="edu-admin__button edu-admin__button--secondary" data-orientation="landscape" aria-pressed="true">Na šířku</button><button type="button" class="edu-admin__button edu-admin__button--secondary" data-orientation="portrait" aria-pressed="false">Na výšku</button></div></div><div id="layouts" class="player-layouts" role="group" aria-label="Doporučená rozložení"></div><details id="more-layouts" class="player-more-layouts"><summary>Další rozložení</summary><div id="additional-layouts" class="player-layouts" role="group" aria-label="Další rozložení"></div></details></section>
+      <div class="player-workspace">
+        <section class="edu-admin__card player-card player-editor"><div class="player-section-heading"><div><h2>Obsah částí</h2><p>Výstupy se střídají ve zvoleném pořadí.</p></div></div><div id="segment-tabs" class="player-segment-tabs" role="group" aria-label="Části obrazovky"></div><div id="segments" class="player-segments"></div></section>
+        <section class="edu-admin__card player-card player-preview-card"><div class="player-section-heading"><div><h2>Náhled celé obrazovky</h2><p>Ukazuje právě upravované nastavení.</p></div></div><div id="screen-map" class="player-screen-map" aria-label="Rozložení a výběr části obrazovky"></div><iframe id="preview" title="Náhled upravovaného Přehrávače" src="player.html?preview=1"></iframe><p class="player-preview-note">Veřejný odkaz vede na poslední publikovanou verzi.</p></section>
+      </div>
+      <section class="player-publish-bar" aria-label="Akce Přehrávače"><button class="edu-admin__button" id="publish" type="button">Uložit a publikovat</button><a class="edu-admin__button edu-admin__button--secondary" id="open" href="#" target="_blank" rel="noopener noreferrer" hidden>Otevřít publikovaný výstup</a><button class="edu-admin__button edu-admin__button--secondary" id="copy" type="button" disabled>Kopírovat odkaz</button><p id="status" role="status" aria-live="polite">Načítám školní profil…</p></section>
+    </main>
+  </div>
+</div>
+</body>
+</html>

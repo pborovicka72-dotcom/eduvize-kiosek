@@ -446,11 +446,16 @@
   }
   async function init() {
     await auth.ready;
-    if (root.EduvizeProfiles?.picker) void root.EduvizeProfiles.picker($('player-profile-picker'));
-    const state = auth.status();
-    if (!state.connected || !ID.test(state.profileId || '') || !state.schoolId) { note('Přihlaste se a vyberte školní profil.'); return; }
+    const initial = auth.status();
+    if (!initial.connected || !initial.schoolId) { note('Přihlaste se a vyberte školní profil.'); return; }
     const requested = new URL(location.href).searchParams.get('edu-profile');
-    if (requested && requested !== state.profileId) { note('Otevřete Přehrávač ze správného školního profilu.'); return; }
+    if (requested && !ID.test(requested)) { note('Neplatný školní profil v odkazu.', true); return; }
+    if (requested && requested !== initial.profileId) await auth.selectProfile(requested);
+    const state = auth.status();
+    if (!ID.test(state.profileId || '') || requested && requested !== state.profileId) {
+      note('Požadovaný školní profil se nepodařilo aktivovat.', true); return;
+    }
+    if (root.EduvizeProfiles?.picker) void root.EduvizeProfiles.picker($('player-profile-picker'));
     schoolId = state.schoolId; profileId = state.profileId;
     try {
       const players = await listPlayers(); guard();
@@ -491,5 +496,7 @@
   root.EduvizeProfileBeforeSwitch = async () => !dirty() || confirm('Přepnout profil? Neuložené změny Přehrávače se ztratí.');
   root.addEventListener('eduvize-profile-selected', () => { if (profileId && auth.status().profileId !== profileId) location.reload(); });
   root.addEventListener('eduvize-admin-auth-change', () => { if (profileId) { try { guard(); } catch { ++loadEpoch; catalog = []; $('publish').disabled = true; $('copy').disabled = true; note('Profil se změnil. Obnovte nastavení Přehrávače.'); } } });
+  $('preview').addEventListener('load', () => preview(true));
+  render();
   init().catch(error => note(error.message));
 })(window);

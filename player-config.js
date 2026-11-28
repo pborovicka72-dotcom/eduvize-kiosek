@@ -11,6 +11,9 @@
   const ID = /^[a-f0-9]{32}$/;
   let config = model.empty(), catalog = [], profileId = '', schoolId = '', outputId = '', busy = false, loadEpoch = 0;
   let selectedItem = null, pendingId = '', dragging = null, baseline = JSON.stringify(config), lastPreview = '';
+  let initializing = false, initialized = false;
+  let catalogState = 'loading', catalogMessage = 'Načítám publikované výstupy…';
+  let failedApps = new Set();
   const openedApps = new Set();
   let unavailableApps = new Set();
   function note(message, error = false) { $('status').textContent = message; $('status').dataset.error = String(error); }
@@ -185,7 +188,8 @@
   function renderLibrary() {
     const host = $('library-apps'); host.replaceChildren();
     const query = $('library-search').value.trim().toLocaleLowerCase('cs');
-    $('library-hint').textContent = pendingId ? 'Výstup je vybraný. Klikněte na segment vpravo nebo použijte tlačítko Vložit sem.' :
+    $('library-hint').textContent = catalogState !== 'ready' ? catalogMessage : pendingId ?
+      'Výstup je vybraný. Klikněte na segment vpravo nebo použijte tlačítko Vložit sem.' :
       'Přetáhněte výstup na segment vpravo.';
     for (const [appId, appName] of Object.entries(model.APPS)) {
       const all = catalog.filter(item => item.appId === appId);
@@ -197,7 +201,8 @@
       group.ontoggle = () => { if (!group.isConnected) return; if (group.open) openedApps.add(appId); else openedApps.delete(appId); };
       const summary = document.createElement('summary');
       const name = document.createElement('strong'); name.textContent = appName;
-      const count = document.createElement('span'); count.textContent = all.length ? outputCount(all.length) : 'Bez výstupu';
+      const count = document.createElement('span'); count.textContent = catalogState !== 'ready' ? 'Čeká na načtení' :
+        failedApps.has(appId) ? 'Nenačteno' : all.length ? outputCount(all.length) : 'Bez výstupu';
       summary.append(name, count); group.append(summary);
       const body = document.createElement('div'); body.className = 'player-app-body';
       if (all.length) {
@@ -216,7 +221,8 @@
       }
       if (!entries.length) {
         const empty = document.createElement('p');
-        empty.textContent = unavailableApps.has(appId) ? 'Aplikace v tomto profilu není dostupná.' :
+        empty.textContent = catalogState !== 'ready' ? catalogMessage : failedApps.has(appId) ?
+          'Výstupy se nepodařilo načíst. Obnovte stránku.' : unavailableApps.has(appId) ? 'Aplikace v tomto profilu není dostupná.' :
           'Zatím žádný publikovaný výstup.';
         body.append(empty);
       }
@@ -392,10 +398,13 @@
     render(); note('Přehrávač byl načten.');
   }
   async function loadCatalog(epoch) {
+    catalogState = 'loading'; catalogMessage = 'Načítám publikované výstupy školy…'; renderLibrary();
     note('Načítám publikované výstupy školy…');
     const groups = await Promise.allSettled(Object.keys(model.APPS).map(appId => listApp(appId)));
     if (epoch !== loadEpoch) return;
     const failed = groups.filter(result => result.status === 'rejected' && result.reason?.status !== 422);
+    failedApps = new Set(groups.flatMap((result, index) => result.status === 'rejected' && result.reason?.status !== 422 ?
+      [Object.keys(model.APPS)[index]] : []));
     unavailableApps = new Set(groups.flatMap((result, index) => result.status === 'rejected' && result.reason?.status === 422 ?
       [Object.keys(model.APPS)[index]] : []));
     const found = groups.flatMap(result => result.status === 'fulfilled' ? result.value : [])
@@ -406,7 +415,7 @@
       openedApps.add(item.appId);
       if (openedApps.size === 2) break;
     }
-    catalog = found; render();
+    catalog = found; catalogState = 'ready'; catalogMessage = ''; render();
     note(failed.length ? 'Některé výstupy se nepodařilo načíst. Obnovte stránku před publikováním.' :
       found.length ? 'Přetáhněte publikované výstupy do segmentů obrazovky.' :
         'V tomto profilu zatím nejsou publikované výstupy aplikací. Nejprve je vytvořte v jejich nastavení.');
@@ -445,27 +454,44 @@
     finally { busy = false; $('publish').disabled = false; }
   }
   async function init() {
+    if (initializing || initialized) return;
+    initializing = true;
+    try {
     await auth.ready;
     const initial = auth.status();
-    if (!initial.connected || !initial.schoolId) { note('Přihlaste se a vyberte školní profil.'); return; }
+    if (!initial.connected || !initial.schoolId) {
+      catalogState = 'error'; catalogMessage = 'Přihlaste se a vyberte školní profil.'; renderLibrary(); note(catalogMessage); return;
+    }
     const requested = new URL(location.href).searchParams.get('edu-profile');
-    if (requested && !ID.test(requested)) { note('Neplatný školní profil v odkazu.', true); return; }
+    if (requested && !ID.test(requested)) {
+      catalogState = 'error'; catalogMessage = 'Neplatný školní profil v odkazu.'; renderLibrary(); note(catalogMessage, true); return;
+    }
     if (requested && requested !== initial.profileId) await auth.selectProfile(requested);
     const state = auth.status();
     if (!ID.test(state.profileId || '') || requested && requested !== state.profileId) {
-      note('Požadovaný školní profil se nepodařilo aktivovat.', true); return;
+      catalogState = 'error'; catalogMessage = 'Požadovaný školní profil se nepodařilo aktivovat.';
+      renderLibrary(); note(catalogMessage, true); return;
     }
     if (root.EduvizeProfiles?.picker) void root.EduvizeProfiles.picker($('player-profile-picker'));
     schoolId = state.schoolId; profileId = state.profileId;
-    try {
       const players = await listPlayers(); guard();
+      $('existing').replaceChildren(option('', 'Nová obrazovka'));
       for (const item of players) $('existing').append(option(item.id, (item.label || 'Přehrávač') + ' · ' + item.id.slice(0, 8)));
       const requestedOutput = new URL(location.href).searchParams.get('player-id');
       const target = requestedOutput || (players.length === 1 ? players[0].id : '');
-      if (target) await openPlayer(target);
-      else render();
+      let playerError = '';
+      if (target) {
+        try { await openPlayer(target); }
+        catch (error) { playerError = error.message || 'Uloženou obrazovku se nepodařilo načíst.'; render(); }
+      } else render();
       await loadCatalog(++loadEpoch);
-    } catch (error) { note(error.message); }
+      initialized = true;
+      if (playerError) note('Uloženou obrazovku se nepodařilo načíst: ' + playerError, true);
+    } catch (error) {
+      catalogState = 'error'; catalogMessage = error.message || 'Výstupy se nepodařilo načíst.';
+      renderLibrary(); note(catalogMessage, true);
+    }
+    finally { initializing = false; }
   }
   $('existing').onchange = async () => {
     if (!$('existing').value) { $('new').click(); return; }
@@ -495,7 +521,12 @@
   root.addEventListener('message', event => { if (event.origin === location.origin && event.source === $('preview').contentWindow && event.data?.type === 'eduvize-player-preview-ready') preview(true); });
   root.EduvizeProfileBeforeSwitch = async () => !dirty() || confirm('Přepnout profil? Neuložené změny Přehrávače se ztratí.');
   root.addEventListener('eduvize-profile-selected', () => { if (profileId && auth.status().profileId !== profileId) location.reload(); });
-  root.addEventListener('eduvize-admin-auth-change', () => { if (profileId) { try { guard(); } catch { ++loadEpoch; catalog = []; $('publish').disabled = true; $('copy').disabled = true; note('Profil se změnil. Obnovte nastavení Přehrávače.'); } } });
+  root.addEventListener('eduvize-admin-auth-change', () => {
+    if (!profileId) { if (auth.status().connected) queueMicrotask(init); return; }
+    try { guard(); if (!initialized) queueMicrotask(init); }
+    catch { ++loadEpoch; catalog = []; $('publish').disabled = true; $('copy').disabled = true; note('Profil se změnil. Obnovte nastavení Přehrávače.'); }
+  });
+  root.addEventListener('focus', () => { if (!initialized) void init(); });
   $('preview').addEventListener('load', () => preview(true));
   render();
   init().catch(error => note(error.message));
